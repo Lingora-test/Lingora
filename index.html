@@ -1056,8 +1056,10 @@ try {
 } catch(e) { USED_CODES = new Set(); }
 
 function checkAccess() {
-  const raw  = document.getElementById('access-input').value.trim().toUpperCase();
+  const inp   = document.getElementById('access-input');
   const errEl = document.getElementById('access-err');
+  if (!inp) return;
+  const raw   = inp.value.trim().toUpperCase();
 
   if (!VALID_CODES.has(raw)) {
     errEl.textContent = 'Code invalide. Vérifiez l\'orthographe ou contactez LINGORA.';
@@ -1074,19 +1076,29 @@ function checkAccess() {
   USED_CODES.add(raw);
   try { localStorage.setItem('lingora_used', JSON.stringify([...USED_CODES])); } catch(e) {}
 
-  S.accessCode = raw;
+  // Cacher l'écran d'accès et montrer l'accueil directement
+  document.getElementById('screen-access').style.display  = 'none';
+  document.getElementById('screen-welcome').style.display = 'block';
+  document.getElementById('screen-welcome').classList.add('active');
+  document.getElementById('screen-access').classList.remove('active');
+
+  // Stocker le code pour la suite
+  if (typeof S !== 'undefined') S.accessCode = raw;
   errEl.classList.remove('show');
-  showScreen('screen-welcome');
 }
 
-// Appui Entrée sur le champ de code
-document.getElementById('access-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') checkAccess();
-  // Auto-format : majuscules
-  setTimeout(() => {
-    document.getElementById('access-input').value =
-      document.getElementById('access-input').value.toUpperCase();
-  }, 0);
+// Initialiser les écouteurs après le chargement du DOM
+document.addEventListener('DOMContentLoaded', function() {
+  const inp = document.getElementById('access-input');
+  if (inp) {
+    inp.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') checkAccess();
+      setTimeout(() => { inp.value = inp.value.toUpperCase(); }, 0);
+    });
+    inp.addEventListener('input', function() {
+      setTimeout(() => { inp.value = inp.value.toUpperCase(); }, 0);
+    });
+  }
 });
 
 function showLegal() {
@@ -1549,7 +1561,15 @@ function stopTimer(){ clearInterval(S.timerInterval); }
 // ─────────────────────────────────────────
 // NAVIGATION
 // ─────────────────────────────────────────
-function goToForm(){ showScreen('screen-form'); }
+function goToForm(){
+  document.querySelectorAll('.screen').forEach(s => {
+    s.classList.remove('active');
+    s.style.display = '';
+  });
+  const f = document.getElementById('screen-form');
+  f.classList.add('active');
+  f.style.display = 'flex';
+}
 
 function startTest(){
   const prenom=qs('f-prenom').value.trim();
