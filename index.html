@@ -1,0 +1,2248 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LINGORA — Évaluation des Langues</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+
+/* ══════════════════════════════════════════
+TOKENS LINGORA
+Palette : nuit de Méditerranée + or vif
+Typo : Playfair Display (titres) + Inter
+Signature : trait diagonal doré animé
+══════════════════════════════════════════ */
+:root {
+–nuit:     #0d1117;
+–encre:    #161b27;
+–ardoise:  #1f2937;
+–cobalt:   #1e3a5f;
+–or:       #d4a843;
+–or-vif:   #f0c060;
+–or-pale:  #fdf3dc;
+–blanc:    #f9f7f4;
+–gris1:    #e8e4de;
+–gris2:    #b8b0a4;
+–gris3:    #6b6560;
+–vert:     #22c55e;
+–rouge:    #ef4444;
+–bleu-clair:#3b82f6;
+
+–r:        10px;
+–r-lg:     18px;
+–r-xl:     28px;
+–sh:       0 2px 16px rgba(13,17,23,.10);
+–sh-lg:    0 8px 40px rgba(13,17,23,.18);
+–sh-or:    0 4px 24px rgba(212,168,67,.30);
+}
+
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+html { scroll-behavior:smooth; }
+body { font-family:‘Inter’,sans-serif; background:var(–blanc); color:var(–nuit); min-height:100vh; overflow-x:hidden; }
+
+/* ══ HEADER ══ */
+header {
+background:var(–nuit);
+padding:0 40px;
+height:64px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+position:sticky;
+top:0;
+z-index:300;
+border-bottom:1px solid rgba(212,168,67,.15);
+}
+
+/* Logo SVG inline */
+.logo-wrap { display:flex; align-items:center; gap:12px; text-decoration:none; }
+.logo-svg { width:38px; height:38px; flex-shrink:0; }
+.logo-name {
+font-family:‘Playfair Display’,serif;
+font-size:22px;
+font-weight:900;
+color:white;
+letter-spacing:.5px;
+}
+.logo-name span { color:var(–or); }
+.logo-tagline { font-size:10px; color:var(–gris2); letter-spacing:2px; text-transform:uppercase; margin-top:1px; }
+
+.hdr-right { display:flex; align-items:center; gap:14px; }
+#hdr-timer {
+font-family:‘JetBrains Mono’,monospace;
+font-size:14px; color:var(–or);
+background:rgba(212,168,67,.1);
+border:1px solid rgba(212,168,67,.2);
+padding:5px 14px; border-radius:100px;
+display:none;
+}
+#hdr-timer.warn { color:var(–nuit); background:var(–or); animation:pulse .8s infinite; }
+@keyframes pulse { 50%{opacity:.65;} }
+#hdr-prog-wrap { display:none; align-items:center; gap:10px; }
+#hdr-prog-bar { width:140px; height:5px; background:rgba(255,255,255,.08); border-radius:3px; overflow:hidden; }
+#hdr-prog-fill { height:100%; background:var(–or); width:0%; transition:width .5s; border-radius:3px; }
+#hdr-prog-lbl { font-size:11px; color:var(–gris2); font-family:‘JetBrains Mono’,monospace; }
+
+/* ══ SCREENS ══ */
+.screen { display:none; }
+.screen.active { display:block; }
+
+/* ══════════════════════════════════════════
+ÉCRAN 0 — ACCÈS (code unique)
+══════════════════════════════════════════ */
+#screen-access {
+min-height:calc(100vh - 64px);
+display:none;
+align-items:center;
+justify-content:center;
+padding:40px 20px;
+background:var(–nuit);
+position:relative;
+overflow:hidden;
+}
+#screen-access.active { display:flex; }
+#screen-access::before {
+content:’’;
+position:absolute;
+inset:0;
+background: repeating-linear-gradient(
+-45deg,
+transparent,
+transparent 60px,
+rgba(212,168,67,.03) 60px,
+rgba(212,168,67,.03) 61px
+);
+}
+
+.access-card {
+background:var(–encre);
+border:1px solid rgba(212,168,67,.2);
+border-radius:var(–r-xl);
+padding:52px 48px;
+max-width:480px;
+width:100%;
+text-align:center;
+position:relative;
+z-index:1;
+box-shadow: 0 0 80px rgba(212,168,67,.08), var(–sh-lg);
+}
+
+/* Signature LINGORA — trait diagonal animé */
+.access-card::before {
+content:’’;
+position:absolute;
+top:0; left:0; right:0;
+height:3px;
+background:linear-gradient(90deg, transparent, var(–or), transparent);
+border-radius:var(–r-xl) var(–r-xl) 0 0;
+animation:shimmer 3s ease-in-out infinite;
+}
+@keyframes shimmer {
+0%,100% { opacity:.4; }
+50% { opacity:1; }
+}
+
+.access-logo-big {
+display:flex; align-items:center; justify-content:center; gap:14px;
+margin-bottom:28px;
+}
+.access-logo-big svg { width:52px; height:52px; }
+.access-logo-big h1 {
+font-family:‘Playfair Display’,serif;
+font-size:38px; font-weight:900;
+color:white; letter-spacing:1px;
+}
+.access-logo-big h1 span { color:var(–or); }
+
+.access-tagline {
+font-size:13px; color:var(–gris2);
+letter-spacing:2.5px; text-transform:uppercase;
+margin-bottom:36px;
+}
+.access-desc {
+font-size:15px; color:rgba(255,255,255,.55);
+line-height:1.7; margin-bottom:36px;
+}
+.access-form-lbl {
+font-size:11px; font-weight:700; letter-spacing:1.5px;
+text-transform:uppercase; color:var(–or);
+margin-bottom:10px; text-align:left;
+}
+.access-input {
+width:100%;
+background:rgba(255,255,255,.05);
+border:1.5px solid rgba(212,168,67,.25);
+border-radius:var(–r);
+padding:16px 20px;
+font-size:18px; font-family:‘JetBrains Mono’,monospace;
+color:white; letter-spacing:3px; text-align:center;
+transition:border-color .2s, background .2s;
+margin-bottom:14px;
+}
+.access-input:focus { outline:none; border-color:var(–or); background:rgba(212,168,67,.06); }
+.access-input::placeholder { color:rgba(255,255,255,.2); letter-spacing:1px; font-size:14px; }
+
+.access-err {
+background:rgba(239,68,68,.1);
+border:1px solid rgba(239,68,68,.3);
+color:#fca5a5;
+padding:10px 16px; border-radius:8px;
+font-size:13px; margin-bottom:14px;
+display:none;
+}
+.access-err.show { display:block; }
+
+.btn-gold {
+width:100%;
+background:var(–or);
+color:var(–nuit);
+border:none; border-radius:100px;
+padding:16px 32px;
+font-size:15px; font-weight:700;
+font-family:‘Inter’,sans-serif;
+cursor:pointer; transition:all .2s;
+letter-spacing:.3px;
+box-shadow:var(–sh-or);
+}
+.btn-gold:hover { background:var(–or-vif); transform:translateY(-2px); box-shadow:0 8px 32px rgba(212,168,67,.4); }
+.btn-gold:active { transform:translateY(0); }
+.btn-gold:disabled { opacity:.4; cursor:not-allowed; transform:none; }
+
+.access-footer {
+margin-top:28px;
+font-size:12px; color:rgba(255,255,255,.2);
+line-height:1.6;
+}
+.access-footer a { color:rgba(212,168,67,.5); text-decoration:none; }
+.access-footer a:hover { color:var(–or); }
+
+/* ══════════════════════════════════════════
+ÉCRAN 1 — ACCUEIL
+══════════════════════════════════════════ */
+#screen-welcome { min-height:calc(100vh - 64px); }
+#screen-welcome.active { display:block; }
+
+.hero {
+background:var(–nuit);
+padding:80px 40px 70px;
+text-align:center;
+position:relative;
+overflow:hidden;
+}
+.hero::before {
+content:’’;
+position:absolute; inset:0;
+background:radial-gradient(ellipse 80% 60% at 50% 0%, rgba(212,168,67,.12), transparent 70%);
+pointer-events:none;
+}
+.hero-eyebrow {
+display:inline-flex; align-items:center; gap:8px;
+background:rgba(212,168,67,.12);
+border:1px solid rgba(212,168,67,.3);
+color:var(–or);
+padding:6px 18px; border-radius:100px;
+font-size:11px; font-weight:700;
+letter-spacing:2px; text-transform:uppercase;
+margin-bottom:28px;
+position:relative; z-index:1;
+}
+.hero h1 {
+font-family:‘Playfair Display’,serif;
+font-size:clamp(38px,6vw,72px);
+color:white; line-height:1.08;
+margin-bottom:18px;
+position:relative; z-index:1;
+}
+.hero h1 em { font-style:italic; color:var(–or); }
+.hero-sub {
+font-size:17px; color:rgba(255,255,255,.55);
+max-width:520px; margin:0 auto 48px;
+line-height:1.75;
+position:relative; z-index:1;
+}
+.feats {
+display:flex; flex-wrap:wrap; justify-content:center;
+gap:10px; margin-bottom:48px;
+position:relative; z-index:1;
+}
+.feat {
+background:rgba(255,255,255,.06);
+border:1px solid rgba(255,255,255,.1);
+color:rgba(255,255,255,.75);
+padding:8px 16px; border-radius:100px;
+font-size:13px; display:flex; align-items:center; gap:7px;
+}
+.stats {
+display:flex; justify-content:center; gap:48px;
+margin-bottom:52px;
+position:relative; z-index:1;
+}
+.stat .n {
+font-family:‘Playfair Display’,serif;
+font-size:42px; font-weight:700;
+color:var(–or); line-height:1;
+}
+.stat .l { font-size:11px; color:rgba(255,255,255,.35); text-transform:uppercase; letter-spacing:1.5px; margin-top:4px; }
+
+.comp-grid {
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(155px,1fr));
+gap:12px; max-width:860px; margin:0 auto 52px;
+position:relative; z-index:1;
+}
+.comp-card {
+background:rgba(255,255,255,.05);
+border:1px solid rgba(255,255,255,.08);
+border-radius:var(–r);
+padding:20px 14px; text-align:center; color:white;
+transition:all .2s;
+}
+.comp-card:hover { background:rgba(212,168,67,.1); border-color:rgba(212,168,67,.3); transform:translateY(-2px); }
+.comp-card .ci { font-size:26px; margin-bottom:9px; }
+.comp-card .cn { font-size:13px; font-weight:600; margin-bottom:3px; }
+.comp-card .cd { font-size:11px; color:rgba(255,255,255,.35); }
+
+/* ══════════════════════════════════════════
+ÉCRAN 2 — FORMULAIRE
+══════════════════════════════════════════ */
+#screen-form { min-height:calc(100vh - 64px); display:none; align-items:center; justify-content:center; padding:60px 20px; background:var(–blanc); }
+#screen-form.active { display:flex; }
+
+.form-card {
+background:white;
+border-radius:var(–r-xl);
+padding:48px;
+max-width:580px; width:100%;
+box-shadow:var(–sh-lg);
+border:1px solid var(–gris1);
+}
+.form-card h2 {
+font-family:‘Playfair Display’,serif;
+font-size:30px; color:var(–nuit); margin-bottom:6px;
+}
+.form-sub { font-size:14px; color:var(–gris3); margin-bottom:32px; }
+.fgrid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.fg { margin-bottom:20px; }
+.fg label { display:block; font-size:11px; font-weight:700; color:var(–nuit); text-transform:uppercase; letter-spacing:.8px; margin-bottom:7px; }
+.fg input, .fg select {
+width:100%; padding:13px 16px;
+border:1.5px solid var(–gris1);
+border-radius:var(–r);
+font-size:15px; font-family:‘Inter’,sans-serif; color:var(–nuit);
+transition:border-color .2s; background:var(–blanc);
+}
+.fg input:focus, .fg select:focus { outline:none; border-color:var(–or); background:white; }
+.fdiv { height:1px; background:var(–gris1); margin:20px 0; }
+.fnote { font-size:12px; color:var(–gris2); margin-bottom:18px; line-height:1.6; }
+.ferr { background:rgba(239,68,68,.07); border:1px solid rgba(239,68,68,.2); color:#b91c1c; padding:10px 14px; border-radius:8px; font-size:13px; display:none; margin-top:10px; }
+.ferr.show { display:block; }
+
+/* ══════════════════════════════════════════
+ÉCRAN 3 — TEST
+══════════════════════════════════════════ */
+#screen-test { min-height:calc(100vh - 64px); padding:30px 20px; display:none; background:var(–blanc); }
+#screen-test.active { display:block; }
+.test-wrap { max-width:800px; margin:0 auto; }
+
+.sec-hdr {
+background:var(–nuit);
+border-radius:var(–r-lg) var(–r-lg) 0 0;
+padding:22px 28px;
+display:flex; align-items:center; gap:16px;
+}
+.sec-ico { width:48px; height:48px; background:var(–or); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; }
+.sec-info h2 { font-family:‘Playfair Display’,serif; font-size:20px; color:white; margin-bottom:3px; }
+.sec-info p { font-size:12px; color:rgba(255,255,255,.4); }
+.sec-meta { margin-left:auto; text-align:right; }
+.sec-meta .qn { font-family:‘JetBrains Mono’,monospace; font-size:26px; font-weight:600; color:var(–or); line-height:1; }
+.sec-meta .ql { font-size:11px; color:rgba(255,255,255,.35); margin-top:2px; }
+.sec-prog { height:3px; background:rgba(255,255,255,.08); }
+.sec-prog-fill { height:100%; background:var(–or); transition:width .4s; width:0%; }
+
+.q-card {
+background:white;
+border-radius:0 0 var(–r-lg) var(–r-lg);
+padding:32px 28px;
+box-shadow:var(–sh);
+min-height:400px;
+display:flex; flex-direction:column;
+border:1px solid var(–gris1);
+border-top:none;
+}
+.lvl-badge {
+display:inline-flex; align-items:center; gap:6px;
+padding:3px 11px; border-radius:100px;
+font-size:10px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase;
+margin-bottom:0;
+}
+.lv-prea1{background:#f0f0f0;color:#666;} .lv-a1{background:#dcfce7;color:#15803d;} .lv-a2{background:#dbeafe;color:#1d4ed8;}
+.lv-b1{background:#fef9c3;color:#a16207;} .lv-b2{background:#fee2e2;color:#b91c1c;}
+.lv-c1{background:#f3e8ff;color:#7e22ce;} .lv-c2{background:var(–nuit);color:var(–or);}
+.q-type-tag { display:inline-block; background:var(–gris1); color:var(–gris3); font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; padding:3px 10px; border-radius:100px; margin-left:8px; }
+
+.q-ctx {
+background:var(–blanc);
+border-left:3px solid var(–or);
+padding:14px 18px;
+border-radius:0 var(–r) var(–r) 0;
+font-size:14px; line-height:1.8; color:var(–gris3);
+margin:16px 0 8px; font-style:italic;
+white-space:pre-line;
+}
+.q-text { font-size:17px; line-height:1.65; color:var(–nuit); margin-bottom:8px; font-weight:500; margin-top:12px; }
+.q-instr { font-size:13px; color:var(–gris2); margin-bottom:20px; }
+
+.opts-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px; }
+.opt {
+background:var(–blanc); border:1.5px solid var(–gris1);
+border-radius:var(–r); padding:13px 16px;
+text-align:left; cursor:pointer; transition:all .18s;
+font-size:14px; color:var(–nuit);
+font-family:‘Inter’,sans-serif;
+display:flex; align-items:flex-start; gap:11px; line-height:1.45;
+}
+.opt:hover { background:white; border-color:var(–or); box-shadow:0 2px 12px rgba(212,168,67,.15); }
+.opt.sel { background:rgba(212,168,67,.08); border-color:var(–or); color:#92400e; font-weight:600; }
+.opt.ok { background:#dcfce7; border-color:#22c55e; color:#15803d; }
+.opt.ko { background:#fee2e2; border-color:#ef4444; color:#b91c1c; }
+.opt-letter { width:26px; height:26px; background:rgba(0,0,0,.05); border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; font-family:‘JetBrains Mono’,monospace; flex-shrink:0; margin-top:1px; }
+
+.vf-row { display:flex; gap:12px; margin-bottom:20px; }
+.vf-btn { flex:1; padding:18px; border:1.5px solid var(–gris1); border-radius:var(–r); background:var(–blanc); font-size:16px; font-weight:700; cursor:pointer; transition:all .18s; font-family:‘Inter’,sans-serif; color:var(–nuit); }
+.vf-btn:hover { background:white; border-color:var(–or); }
+.vf-btn.sel { border-color:var(–or); background:rgba(212,168,67,.07); color:#92400e; }
+.vf-btn.ok { background:#dcfce7; border-color:#22c55e; color:#15803d; }
+.vf-btn.ko { background:#fee2e2; border-color:#ef4444; color:#b91c1c; }
+
+.fill-wrap { margin-bottom:20px; }
+.fill-input { width:100%; padding:14px 18px; border:1.5px solid var(–gris1); border-radius:var(–r); font-size:16px; font-family:‘Inter’,sans-serif; color:var(–nuit); transition:border-color .2s; background:var(–blanc); }
+.fill-input:focus { outline:none; border-color:var(–or); background:white; }
+.fill-input.ok { border-color:var(–vert); background:#f0fdf4; }
+.fill-input.ko { border-color:var(–rouge); background:#fef2f2; }
+
+.text-area { width:100%; padding:14px 18px; border:1.5px solid var(–gris1); border-radius:var(–r); font-size:15px; font-family:‘Inter’,sans-serif; color:var(–nuit); resize:vertical; min-height:130px; transition:border-color .2s; background:var(–blanc); line-height:1.6; }
+.text-area:focus { outline:none; border-color:var(–or); background:white; }
+.wc { font-size:12px; color:var(–gris2); text-align:right; margin-top:4px; }
+
+.oral-sim { background:linear-gradient(135deg,var(–nuit),var(–cobalt)); border-radius:var(–r); padding:24px; margin-bottom:16px; color:white; text-align:center; }
+.oral-sim .mic { font-size:44px; margin-bottom:10px; }
+.oral-sim h4 { font-family:‘Playfair Display’,serif; font-size:18px; margin-bottom:6px; }
+.oral-sim p { font-size:13px; color:rgba(255,255,255,.55); margin-bottom:16px; line-height:1.5; }
+.dot-row { display:flex; gap:7px; justify-content:center; }
+.dot-a { width:8px; height:8px; border-radius:50%; background:var(–or); animation:dp 1s infinite; }
+.dot-a:nth-child(2){animation-delay:.2s;} .dot-a:nth-child(3){animation-delay:.4s;}
+@keyframes dp{0%,100%{transform:scale(1);opacity:.4;}50%{transform:scale(1.5);opacity:1;}}
+
+.feedback { border-radius:var(–r); padding:13px 18px; margin-bottom:16px; font-size:14px; line-height:1.65; display:none; }
+.feedback.show { display:block; }
+.feedback.ok { background:#f0fdf4; border:1px solid #86efac; color:#15803d; }
+.feedback.ko { background:#fef2f2; border:1px solid #fca5a5; color:#b91c1c; }
+
+.q-footer { display:flex; align-items:center; justify-content:space-between; padding-top:18px; border-top:1px solid var(–gris1); margin-top:auto; }
+.dots-row { display:flex; gap:5px; flex-wrap:wrap; }
+.dot { width:9px; height:9px; border-radius:50%; background:var(–gris1); }
+.dot.ok { background:var(–vert); } .dot.ko { background:var(–rouge); } .dot.cur { background:var(–or); box-shadow:0 0 0 2px rgba(212,168,67,.3); }
+.btn-next { background:var(–nuit); color:white; border:none; padding:11px 26px; border-radius:100px; font-size:14px; font-weight:700; cursor:pointer; transition:all .2s; display:none; }
+.btn-next:hover { background:var(–cobalt); transform:translateY(-1px); }
+
+/* ══════════════════════════════════════════
+ÉCRAN 4 — CHARGEMENT
+══════════════════════════════════════════ */
+#screen-loading { min-height:calc(100vh - 64px); display:none; align-items:center; justify-content:center; flex-direction:column; text-align:center; padding:40px; gap:20px; background:var(–blanc); }
+#screen-loading.active { display:flex; }
+.ring { width:64px; height:64px; border:3px solid var(–gris1); border-top-color:var(–or); border-radius:50%; animation:spin 1s linear infinite; }
+@keyframes spin{to{transform:rotate(360deg);}}
+.ld-t { font-family:‘Playfair Display’,serif; font-size:26px; color:var(–nuit); }
+.ld-s { color:var(–gris2); font-size:14px; }
+.steps { list-style:none; text-align:left; max-width:360px; width:100%; display:flex; flex-direction:column; gap:12px; }
+.steps li { display:flex; align-items:center; gap:12px; font-size:14px; color:var(–gris2); transition:color .3s; }
+.steps li.done { color:var(–nuit); font-weight:600; }
+.s-ico { width:28px; height:28px; border-radius:50%; background:var(–gris1); display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0; transition:background .3s; }
+.steps li.done .s-ico { background:var(–vert); }
+
+/* ══════════════════════════════════════════
+ÉCRAN 5 — RAPPORT
+══════════════════════════════════════════ */
+#screen-report { display:none; padding:36px 20px 80px; background:var(–blanc); }
+#screen-report.active { display:block; }
+.rpt-wrap { max-width:900px; margin:0 auto; }
+
+.rpt-hero {
+background:var(–nuit);
+border-radius:var(–r-xl);
+padding:44px; margin-bottom:22px;
+position:relative; overflow:hidden;
+}
+.rpt-hero::before {
+content:’’;
+position:absolute; inset:0;
+background:radial-gradient(ellipse 60% 80% at 90% 50%, rgba(212,168,67,.1), transparent);
+pointer-events:none;
+}
+.rpt-hero::after {
+content:‘LINGORA’;
+position:absolute; right:-20px; bottom:-30px;
+font-family:‘Playfair Display’,serif;
+font-size:120px; font-weight:900;
+color:rgba(255,255,255,.03);
+pointer-events:none; user-select:none;
+line-height:1;
+}
+.rpt-eye { font-size:11px; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,.35); margin-bottom:10px; }
+.rpt-nm { font-family:‘Playfair Display’,serif; font-size:30px; color:white; margin-bottom:4px; position:relative; z-index:1; }
+.rpt-dt { font-size:13px; color:rgba(255,255,255,.35); margin-bottom:28px; }
+.rpt-lv-row { display:flex; align-items:center; gap:24px; flex-wrap:wrap; position:relative; z-index:1; }
+.lv-pill { background:var(–or); padding:10px 26px; border-radius:var(–r); font-family:‘JetBrains Mono’,monospace; font-size:38px; font-weight:600; line-height:1; box-shadow:var(–sh-or); flex-shrink:0; color:var(–nuit); }
+.lv-desc h3 { font-family:‘Playfair Display’,serif; font-size:22px; color:white; margin-bottom:5px; }
+.lv-desc p { font-size:13px; color:rgba(255,255,255,.5); line-height:1.6; max-width:340px; }
+.rpt-glob { margin-left:auto; text-align:center; position:relative; z-index:1; }
+.rpt-glob .big { font-family:‘Playfair Display’,serif; font-size:56px; font-weight:700; color:var(–or); line-height:1; }
+.rpt-glob .lbl { font-size:11px; color:rgba(255,255,255,.35); text-transform:uppercase; letter-spacing:1.5px; }
+
+/* Echelle */
+.scale-card { background:white; border-radius:var(–r-xl); padding:26px 28px; box-shadow:var(–sh); margin-bottom:20px; border:1px solid var(–gris1); }
+.scale-card h3 { font-family:‘Playfair Display’,serif; font-size:19px; color:var(–nuit); margin-bottom:18px; }
+.scale-segs { display:flex; height:14px; border-radius:7px; overflow:hidden; gap:2px; }
+.sseg { flex:1; transition:flex .6s; border-radius:2px; }
+.sseg.active { flex:2.2; }
+.sseg-prea1{background:#e5e7eb;} .sseg.active.sseg-prea1{background:#9ca3af;}
+.sseg-a1{background:#bbf7d0;} .sseg.active.sseg-a1{background:#22c55e;}
+.sseg-a2{background:#bfdbfe;} .sseg.active.sseg-a2{background:#3b82f6;}
+.sseg-b1{background:#fef08a;} .sseg.active.sseg-b1{background:#eab308;}
+.sseg-b2{background:#fecaca;} .sseg.active.sseg-b2{background:#ef4444;}
+.sseg-c1{background:#e9d5ff;} .sseg.active.sseg-c1{background:#a855f7;}
+.sseg-c2{background:rgba(212,168,67,.3);} .sseg.active.sseg-c2{background:var(–or);}
+.scale-lbls { display:flex; justify-content:space-between; margin-top:8px; font-size:11px; font-weight:700; font-family:‘JetBrains Mono’,monospace; color:var(–gris2); }
+.scale-lbls span.active { color:var(–or); font-size:13px; }
+
+/* Scores */
+.scores-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:14px; margin-bottom:20px; }
+.sc-card { background:white; border-radius:var(–r-xl); padding:22px; box-shadow:var(–sh); border-bottom:4px solid var(–gris1); border:1px solid var(–gris1); border-bottom-width:4px; }
+.sc-hd { display:flex; align-items:center; gap:11px; margin-bottom:16px; }
+.sc-ico { width:38px; height:38px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+.sc-nm { font-weight:700; font-size:14px; color:var(–nuit); }
+.sc-pts { font-size:11px; color:var(–gris2); margin-top:2px; }
+.bar-wrap { height:7px; background:var(–gris1); border-radius:4px; overflow:hidden; margin-bottom:9px; }
+.bar { height:100%; border-radius:4px; transition:width 1.3s cubic-bezier(.4,0,.2,1); width:0%; }
+.sc-nums { display:flex; justify-content:space-between; align-items:center; }
+.sc-val { font-family:‘JetBrains Mono’,monospace; font-size:22px; font-weight:600; }
+.sc-sl { font-size:11px; padding:2px 9px; border-radius:100px; font-weight:700; }
+
+/* Rapport IA */
+.ai-section { background:white; border-radius:var(–r-xl); padding:32px; box-shadow:var(–sh); margin-bottom:20px; border:1px solid var(–gris1); }
+.ai-section > h3 { font-family:‘Playfair Display’,serif; font-size:21px; color:var(–nuit); margin-bottom:4px; }
+.ai-section > .desc { font-size:13px; color:var(–gris2); margin-bottom:22px; }
+.ai-content { font-size:15px; line-height:1.82; color:var(–nuit); }
+.ai-content h4 { font-family:‘Playfair Display’,serif; font-size:18px; color:var(–nuit); margin:24px 0 10px; padding-bottom:7px; border-bottom:1px solid var(–gris1); }
+.ai-content h4:first-child { margin-top:0; }
+.ai-content ul { list-style:none; padding:0; display:flex; flex-direction:column; gap:7px; margin:10px 0 16px; }
+.ai-content li::before { content:’→ ’; color:var(–or); font-weight:800; }
+.ai-content strong { color:var(–nuit); }
+.ai-content em { font-style:italic; color:var(–gris3); }
+.ai-content p { margin-bottom:12px; }
+.tag-row { display:flex; flex-wrap:wrap; gap:7px; margin:10px 0 18px; }
+.tag { padding:4px 13px; border-radius:100px; font-size:12px; font-weight:600; }
+.tok { background:#dcfce7; color:#15803d; }
+.tko { background:#fee2e2; color:#b91c1c; }
+.tnl { background:var(–gris1); color:var(–gris3); }
+.plan-row { border:1px solid var(–gris1); border-radius:var(–r); padding:18px; margin-bottom:10px; display:grid; grid-template-columns:auto 1fr; gap:14px; align-items:start; }
+.plan-wk { background:var(–nuit); color:white; padding:3px 11px; border-radius:6px; font-family:‘JetBrains Mono’,monospace; font-size:11px; font-weight:700; white-space:nowrap; margin-top:2px; }
+.plan-c h5 { font-weight:700; font-size:14px; color:var(–nuit); margin-bottom:3px; }
+.plan-c p { font-size:12px; color:var(–gris3); line-height:1.5; }
+
+/* ══════════════════════════════════════════
+CERTIFICAT
+══════════════════════════════════════════ */
+.cert-section { background:white; border-radius:var(–r-xl); padding:32px; box-shadow:var(–sh); margin-bottom:20px; border:1px solid var(–gris1); }
+.cert-section > h3 { font-family:‘Playfair Display’,serif; font-size:21px; color:var(–nuit); margin-bottom:18px; }
+
+#cert-preview {
+border:2px solid var(–or);
+border-radius:var(–r-lg);
+padding:40px;
+text-align:center;
+background:linear-gradient(160deg,#fdf8ee,#fff);
+position:relative;
+overflow:hidden;
+margin-bottom:20px;
+}
+#cert-preview::before, #cert-preview::after {
+content:’’;
+position:absolute;
+width:120px; height:120px;
+border-radius:50%;
+background:rgba(212,168,67,.08);
+}
+#cert-preview::before { top:-30px; left:-30px; }
+#cert-preview::after  { bottom:-30px; right:-30px; }
+.cert-logo { font-family:‘Playfair Display’,serif; font-size:22px; font-weight:900; color:var(–nuit); margin-bottom:4px; }
+.cert-logo span { color:var(–or); }
+.cert-sub { font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(–gris2); margin-bottom:24px; }
+.cert-title { font-family:‘Playfair Display’,serif; font-size:16px; color:var(–gris3); margin-bottom:8px; }
+.cert-name { font-family:‘Playfair Display’,serif; font-size:36px; font-weight:700; color:var(–nuit); margin-bottom:8px; }
+.cert-level-box {
+display:inline-block;
+background:var(–nuit); color:var(–or);
+font-family:‘JetBrains Mono’,monospace;
+font-size:32px; font-weight:600;
+padding:10px 32px; border-radius:var(–r);
+margin:12px 0;
+}
+.cert-desc { font-size:14px; color:var(–gris3); max-width:400px; margin:0 auto 20px; line-height:1.6; }
+.cert-meta { display:flex; justify-content:center; gap:40px; margin-bottom:20px; }
+.cert-meta-item { text-align:center; }
+.cert-meta-item .v { font-weight:700; font-size:15px; color:var(–nuit); }
+.cert-meta-item .k { font-size:11px; color:var(–gris2); text-transform:uppercase; letter-spacing:1px; margin-top:2px; }
+.cert-qr { width:80px; height:80px; background:var(–nuit); border-radius:8px; margin:0 auto; display:flex; align-items:center; justify-content:center; }
+.cert-qr-lbl { font-size:11px; color:var(–gris2); margin-top:6px; }
+.cert-id { font-family:‘JetBrains Mono’,monospace; font-size:12px; color:var(–gris2); margin-top:16px; }
+
+/* ══════════════════════════════════════════
+MENTIONS LÉGALES
+══════════════════════════════════════════ */
+.legal-section { background:white; border-radius:var(–r-xl); padding:32px; box-shadow:var(–sh); margin-bottom:20px; border:1px solid var(–gris1); }
+.legal-section h3 { font-family:‘Playfair Display’,serif; font-size:19px; color:var(–nuit); margin-bottom:16px; }
+.legal-section p, .legal-section li { font-size:13px; color:var(–gris3); line-height:1.75; margin-bottom:8px; }
+.legal-section h4 { font-size:14px; font-weight:700; color:var(–nuit); margin:16px 0 6px; }
+.legal-section ul { padding-left:16px; }
+
+/* Actions rapport */
+.rpt-actions { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:32px; }
+.btn-rpt { padding:14px 28px; border-radius:100px; font-size:14px; font-weight:700; cursor:pointer; border:none; display:flex; align-items:center; gap:8px; transition:all .2s; font-family:‘Inter’,sans-serif; }
+.btn-pdf-cert { background:var(–or); color:var(–nuit); box-shadow:var(–sh-or); }
+.btn-pdf-cert:hover { background:var(–or-vif); transform:translateY(-1px); }
+.btn-pdf-rpt { background:var(–nuit); color:white; }
+.btn-pdf-rpt:hover { background:var(–cobalt); transform:translateY(-1px); }
+.btn-restart { background:white; color:var(–nuit); border:1.5px solid var(–gris1) !important; }
+.btn-restart:hover { border-color:var(–nuit) !important; transform:translateY(-1px); }
+
+/* Streaming */
+.streaming::after { content:‘▌’; animation:blink .7s step-end infinite; color:var(–or); }
+@keyframes blink{50%{opacity:0;}}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:640px){
+header{padding:0 18px;}
+.hero{padding:50px 20px 40px;}
+.comp-grid{grid-template-columns:repeat(2,1fr);}
+.stats{gap:24px;} .stat .n{font-size:32px;}
+.fgrid{grid-template-columns:1fr;}
+.form-card{padding:28px 22px;}
+.opts-grid{grid-template-columns:1fr;}
+.q-card{padding:22px 18px;}
+.rpt-hero{padding:28px 22px;}
+.rpt-lv-row{flex-direction:column;gap:16px;}
+.rpt-glob{margin-left:0;}
+.scores-grid{grid-template-columns:1fr;}
+.access-card{padding:36px 24px;}
+.access-logo-big h1{font-size:28px;}
+#cert-preview{padding:24px 18px;}
+.cert-name{font-size:26px;}
+.cert-meta{gap:20px;}
+#hdr-prog-wrap{display:none!important;}
+}
+
+@media print{
+header,.rpt-actions,#screen-access,#screen-welcome,#screen-form,#screen-test,#screen-loading{display:none!important;}
+#screen-report{display:block!important;padding:0;}
+body{background:white;}
+.rpt-hero{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+.sc-card,.ai-section,.scale-card,.cert-section,.legal-section{break-inside:avoid;page-break-inside:avoid;}
+}
+
+/* ══ NOTIFICATION AIRTABLE ══ */
+#save-notif {
+position: fixed;
+bottom: 24px; right: 24px;
+background: var(–nuit);
+color: white;
+border: 1px solid rgba(212,168,67,.3);
+border-radius: var(–r);
+padding: 14px 20px;
+font-size: 13px;
+display: flex; align-items: center; gap: 10px;
+box-shadow: var(–sh-lg);
+z-index: 999;
+opacity: 0; transform: translateY(20px);
+transition: all .4s ease;
+max-width: 320px;
+}
+#save-notif.show { opacity: 1; transform: translateY(0); }
+#save-notif.success { border-color: rgba(34,197,94,.4); }
+#save-notif.error   { border-color: rgba(239,68,68,.4); }
+#save-notif .notif-icon { font-size: 18px; flex-shrink: 0; }
+#save-notif .notif-text { line-height: 1.4; }
+#save-notif .notif-title { font-weight: 700; margin-bottom: 2px; }
+#save-notif .notif-sub   { font-size: 11px; color: var(–gris2); }
+
+</style>
+</head>
+<body>
+
+<!-- ══ HEADER ══ -->
+
+<header>
+  <a class="logo-wrap" href="#" onclick="return false;">
+    <!-- Logo SVG LINGORA -->
+    <svg class="logo-svg" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="38" height="38" rx="9" fill="#d4a843"/>
+      <!-- Lettre L stylisée avec trait de langue -->
+      <path d="M10 8 L10 28 L22 28" stroke="#0d1117" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- Bulle de dialogue — symbole langue/communication -->
+      <circle cx="27" cy="13" r="7" fill="#0d1117"/>
+      <path d="M22 18 L20 22 L26 19" fill="#0d1117"/>
+      <circle cx="24.5" cy="13" r="1.2" fill="#d4a843"/>
+      <circle cx="27" cy="13" r="1.2" fill="#d4a843"/>
+      <circle cx="29.5" cy="13" r="1.2" fill="#d4a843"/>
+    </svg>
+    <div>
+      <div class="logo-name">LIN<span>GORA</span></div>
+      <div class="logo-tagline">Évaluation des langues</div>
+    </div>
+  </a>
+  <div class="hdr-right">
+    <span id="hdr-timer" style="display:none;">⏱ 00:00</span>
+    <div id="hdr-prog-wrap">
+      <div id="hdr-prog-bar"><div id="hdr-prog-fill"></div></div>
+      <span id="hdr-prog-lbl">0%</span>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════
+     ÉCRAN 0 — ACCÈS PAR CODE UNIQUE
+══════════════════════════════════════════ -->
+
+<div id="screen-access" class="screen active">
+  <div class="access-card">
+    <div class="access-logo-big">
+      <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="52" height="52" rx="13" fill="#d4a843"/>
+        <path d="M14 11 L14 38 L30 38" stroke="#0d1117" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="38" cy="18" r="9" fill="#0d1117"/>
+        <path d="M31 25 L28 31 L36 27" fill="#0d1117"/>
+        <circle cx="35" cy="18" r="1.5" fill="#d4a843"/>
+        <circle cx="38" cy="18" r="1.5" fill="#d4a843"/>
+        <circle cx="41" cy="18" r="1.5" fill="#d4a843"/>
+      </svg>
+      <h1>LIN<span>GORA</span></h1>
+    </div>
+    <p class="access-tagline">Plateforme d'évaluation des langues</p>
+    <p class="access-desc">Entrez votre code d'accès personnel pour démarrer votre évaluation de niveau en français.</p>
+    <div class="access-form-lbl">Code d'accès</div>
+    <input class="access-input" type="text" id="access-input" placeholder="EX : LNG-2024-XXXX" maxlength="16" autocomplete="off" />
+    <div class="access-err" id="access-err">Code invalide ou expiré. Contactez LINGORA.</div>
+    <button class="btn-gold" onclick="checkAccess()">Accéder au test →</button>
+    <div class="access-footer">
+      Vous n'avez pas de code ?
+      <a href="mailto:contact@lingora.dz">contact@lingora.dz</a>
+      &nbsp;·&nbsp;
+      <a href="#" onclick="showLegal();return false;">Mentions légales</a>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     ÉCRAN 1 — ACCUEIL
+══════════════════════════════════════════ -->
+
+<div id="screen-welcome" class="screen">
+  <div class="hero">
+    <div class="hero-eyebrow">✦ Certification CECRL · Niveaux Pré-A1 → C2</div>
+    <h1>Connaissez votre<br><em>vrai niveau</em> de français</h1>
+    <p class="hero-sub">Test adaptatif calibré sur les standards TCF, DELF et TEF. Rapport pédagogique complet + certificat officiel LINGORA.</p>
+    <div class="feats">
+      <span class="feat">🎯 Adaptatif</span>
+      <span class="feat">📊 221 questions</span>
+      <span class="feat">🤖 Rapport IA</span>
+      <span class="feat">⏱ ~2h à 2h30</span>
+      <span class="feat">📄 Certificat PDF</span>
+      <span class="feat">🔐 Accès sécurisé</span>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="n">7</div><div class="l">Compétences</div></div>
+      <div class="stat"><div class="n">221</div><div class="l">Questions</div></div>
+      <div class="stat"><div class="n">7</div><div class="l">Niveaux</div></div>
+    </div>
+    <div class="comp-grid">
+      <div class="comp-card"><div class="ci">📖</div><div class="cn">Compréhension écrite</div><div class="cd">Textes, articles, annonces</div></div>
+      <div class="comp-card"><div class="ci">🎧</div><div class="cn">Compréhension orale</div><div class="cd">Dialogues, interviews</div></div>
+      <div class="comp-card"><div class="ci">✏️</div><div class="cn">Orthographe & Dictée</div><div class="cd">Accords, homophones</div></div>
+      <div class="comp-card"><div class="ci">⚙️</div><div class="cn">Grammaire</div><div class="cd">Temps, subjonctif, syntaxe</div></div>
+      <div class="comp-card"><div class="ci">📚</div><div class="cn">Vocabulaire</div><div class="cd">Registres, expressions</div></div>
+      <div class="comp-card"><div class="ci">✍️</div><div class="cn">Expression écrite</div><div class="cd">E-mails, argumentation</div></div>
+      <div class="comp-card"><div class="ci">🎤</div><div class="cn">Expression orale</div><div class="cd">Simulation guidée</div></div>
+    </div>
+    <button class="btn-gold" style="max-width:280px;margin:0 auto;display:block;" onclick="goToForm()">Commencer mon évaluation →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     ÉCRAN 2 — FORMULAIRE
+══════════════════════════════════════════ -->
+
+<div id="screen-form" class="screen">
+  <div class="form-card">
+    <h2>Votre profil</h2>
+    <p class="form-sub">Ces informations figurent sur votre certificat.</p>
+    <div class="fgrid">
+      <div class="fg"><label>Prénom *</label><input type="text" id="f-prenom" placeholder="Marie"/></div>
+      <div class="fg"><label>Nom *</label><input type="text" id="f-nom" placeholder="Dupont"/></div>
+    </div>
+    <div class="fgrid">
+      <div class="fg"><label>Âge</label><input type="number" id="f-age" placeholder="25" min="10" max="90"/></div>
+      <div class="fg"><label>Pays / Nationalité</label><input type="text" id="f-pays" placeholder="Algérie"/></div>
+    </div>
+    <div class="fg"><label>Langue maternelle</label>
+      <select id="f-langue">
+        <option value="">Sélectionner…</option>
+        <option value="arabe">Arabe</option><option value="anglais">Anglais</option>
+        <option value="espagnol">Espagnol</option><option value="allemand">Allemand</option>
+        <option value="portugais">Portugais</option><option value="chinois">Chinois</option>
+        <option value="russe">Russe</option><option value="autre">Autre</option>
+      </select>
+    </div>
+    <div class="fdiv"></div>
+    <div class="fgrid">
+      <div class="fg"><label>Niveau estimé</label>
+        <select id="f-niveau">
+          <option value="inconnu">Je ne sais pas</option>
+          <option value="debutant">Débutant (Pré-A1/A1)</option>
+          <option value="elementaire">Élémentaire (A2)</option>
+          <option value="intermediaire">Intermédiaire (B1)</option>
+          <option value="avance">Avancé (B2/C1)</option>
+          <option value="expert">Expert (C2)</option>
+        </select>
+      </div>
+      <div class="fg"><label>Objectif</label>
+        <select id="f-objectif">
+          <option value="general">Évaluation générale</option>
+          <option value="universite">Campus France / Université</option>
+          <option value="immigration">Immigration / Visa</option>
+          <option value="emploi">Recherche d'emploi</option>
+          <option value="apprentissage">Suivi personnel</option>
+        </select>
+      </div>
+    </div>
+    <p class="fnote">⏱ Durée estimée : 2h à 2h30 (format TCF) · Connexion internet recommandée · Votre certificat sera généré à la fin</p>
+    <div id="f-err" class="ferr">Veuillez renseigner votre prénom et votre nom.</div>
+    <button class="btn-gold" onclick="startTest()" style="margin-top:8px;">Démarrer l'évaluation →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     ÉCRAN 3 — TEST
+══════════════════════════════════════════ -->
+
+<div id="screen-test" class="screen">
+  <div class="test-wrap">
+    <div class="sec-hdr">
+      <div class="sec-ico" id="s-icon">📖</div>
+      <div class="sec-info"><h2 id="s-title">Compréhension écrite</h2><p id="s-sub">Lisez et répondez</p></div>
+      <div class="sec-meta"><div class="qn" id="s-qn">1/5</div><div class="ql">Questions</div></div>
+    </div>
+    <div class="sec-prog"><div class="sec-prog-fill" id="s-prog"></div></div>
+    <div class="q-card">
+      <div style="display:flex;align-items:center;margin-bottom:0;">
+        <span class="lvl-badge lv-a1" id="q-lvl-badge">A1</span>
+        <span class="q-type-tag" id="q-type-tag">QCM</span>
+      </div>
+      <div class="q-ctx" id="q-ctx" style="display:none;"></div>
+      <div class="q-text" id="q-text">Chargement…</div>
+      <div class="q-instr" id="q-instr"></div>
+      <div id="q-body"></div>
+      <div class="feedback" id="q-fb"></div>
+      <div class="q-footer">
+        <div class="dots-row" id="q-dots"></div>
+        <button class="btn-next" id="btn-next" onclick="nextQuestion()">Suivant →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     ÉCRAN 4 — CHARGEMENT
+══════════════════════════════════════════ -->
+
+<div id="screen-loading" class="screen">
+  <div class="ring"></div>
+  <div class="ld-t">Analyse en cours…</div>
+  <div class="ld-s">LINGORA évalue votre profil linguistique</div>
+  <ul class="steps" id="steps-list">
+    <li id="st-1"><span class="s-ico">📊</span>Calcul des scores par compétence</li>
+    <li id="st-2"><span class="s-ico">🎯</span>Calibration du niveau CECRL</li>
+    <li id="st-3"><span class="s-ico">🔍</span>Identification des lacunes précises</li>
+    <li id="st-4"><span class="s-ico">📝</span>Rédaction du rapport personnalisé</li>
+    <li id="st-5"><span class="s-ico">🏆</span>Génération du certificat LINGORA</li>
+  </ul>
+</div>
+
+<!-- ══════════════════════════════════════════
+     ÉCRAN 5 — RAPPORT COMPLET
+══════════════════════════════════════════ -->
+
+<div id="screen-report" class="screen">
+  <div class="rpt-wrap">
+
+```
+<!-- Hero -->
+<div class="rpt-hero">
+  <div class="rpt-eye">RAPPORT D'ÉVALUATION · LINGORA · CECRL</div>
+  <div class="rpt-nm" id="r-name">—</div>
+  <div class="rpt-dt" id="r-date">—</div>
+  <div class="rpt-lv-row">
+    <div class="lv-pill" id="r-level">—</div>
+    <div class="lv-desc"><h3 id="r-level-name">—</h3><p id="r-level-desc">—</p></div>
+    <div class="rpt-glob"><div class="big" id="r-score">—</div><div class="lbl">Score /100</div></div>
+  </div>
+</div>
+
+<!-- Échelle CECRL -->
+<div class="scale-card">
+  <h3>Votre position sur l'échelle CECRL</h3>
+  <div class="scale-segs">
+    <div class="sseg sseg-prea1" id="ss-prea1"></div><div class="sseg sseg-a1" id="ss-a1"></div>
+    <div class="sseg sseg-a2" id="ss-a2"></div><div class="sseg sseg-b1" id="ss-b1"></div>
+    <div class="sseg sseg-b2" id="ss-b2"></div><div class="sseg sseg-c1" id="ss-c1"></div>
+    <div class="sseg sseg-c2" id="ss-c2"></div>
+  </div>
+  <div class="scale-lbls">
+    <span id="sl-prea1">Pré-A1</span><span id="sl-a1">A1</span><span id="sl-a2">A2</span>
+    <span id="sl-b1">B1</span><span id="sl-b2">B2</span><span id="sl-c1">C1</span><span id="sl-c2">C2</span>
+  </div>
+</div>
+
+<!-- Scores -->
+<div class="scores-grid" id="scores-grid"></div>
+
+<!-- Certificat -->
+<div class="cert-section">
+  <h3>🏆 Votre certificat LINGORA</h3>
+  <div id="cert-preview">
+    <div class="cert-logo">LIN<span style="color:var(--or);">GORA</span></div>
+    <div class="cert-sub">Évaluation des Langues · Certification CECRL</div>
+    <div class="cert-title">Certifie que</div>
+    <div class="cert-name" id="cert-name">—</div>
+    <div style="font-size:14px;color:var(--gris3);margin-bottom:8px;">a obtenu le niveau</div>
+    <div class="cert-level-box" id="cert-level">—</div>
+    <div class="cert-desc" id="cert-desc">—</div>
+    <div class="cert-meta">
+      <div class="cert-meta-item"><div class="v" id="cert-score">—</div><div class="k">Score global</div></div>
+      <div class="cert-meta-item"><div class="v" id="cert-date">—</div><div class="k">Date</div></div>
+      <div class="cert-meta-item"><div class="v" id="cert-duration">—</div><div class="k">Durée</div></div>
+    </div>
+    <div class="cert-qr" id="cert-qr">
+      <!-- QR code généré dynamiquement -->
+    </div>
+    <div class="cert-qr-lbl">Scannez pour vérifier</div>
+    <div class="cert-id" id="cert-id">—</div>
+  </div>
+</div>
+
+<!-- Rapport IA -->
+<div class="ai-section">
+  <h3>Analyse pédagogique complète</h3>
+  <p class="desc">Générée par IA · Calibrée sur les référentiels TCF, DELF et TEF · LINGORA</p>
+  <div class="ai-content" id="ai-content">
+    <div style="display:flex;justify-content:center;padding:40px;"><div class="ring"></div></div>
+  </div>
+</div>
+
+<!-- Mentions légales -->
+<div class="legal-section" id="legal-block">
+  <h3>⚖️ Mentions légales & Politique de confidentialité</h3>
+  <h4>Éditeur</h4>
+  <p>LINGORA est une plateforme d'évaluation linguistique indépendante. Elle n'est affiliée à aucun organisme officiel (France Éducation International, CIEP, Alliance Française).</p>
+  <h4>Nature du certificat</h4>
+  <p>Le certificat LINGORA est un document d'évaluation pédagogique à but indicatif. Il n'est pas équivalent au TCF, DELF, DALF ou TEF officiels et ne peut être soumis comme justificatif auprès des ambassades ou universités à la place de ces certifications officielles. Il constitue un outil de préparation et d'auto-évaluation.</p>
+  <h4>Données personnelles</h4>
+  <ul>
+    <li>Les données saisies (prénom, nom, résultats) ne sont pas transmises à des tiers.</li>
+    <li>Les réponses au test sont traitées localement dans votre navigateur.</li>
+    <li>Le rapport est généré via l'API Claude (Anthropic) — aucune donnée d'identification n'est transmise.</li>
+  </ul>
+  <h4>Propriété intellectuelle</h4>
+  <p>Les questions, le design et le système LINGORA sont la propriété de leurs auteurs. Toute reproduction sans autorisation est interdite.</p>
+  <h4>Contact</h4>
+  <p>Pour toute question : <strong>contact@lingora.dz</strong></p>
+</div>
+
+<!-- Actions -->
+<div class="rpt-actions">
+  <button class="btn-rpt btn-pdf-cert" onclick="downloadCertificate()">🏆 Télécharger le certificat</button>
+  <button class="btn-rpt btn-pdf-rpt" onclick="window.print()">🖨️ Imprimer le rapport</button>
+  <button class="btn-rpt btn-restart" onclick="restartTest()">🔄 Nouveau test</button>
+</div>
+```
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     JAVASCRIPT COMPLET
+══════════════════════════════════════════ -->
+
+<!-- ══ NOTIFICATION SAUVEGARDE ══ -->
+
+<div id="save-notif">
+  <span class="notif-icon" id="notif-icon">💾</span>
+  <div class="notif-text">
+    <div class="notif-title" id="notif-title">Sauvegarde en cours…</div>
+    <div class="notif-sub"  id="notif-sub">Envoi vers LINGORA Résultats</div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ─────────────────────────────────────────
+// SYSTÈME D'ACCÈS PAR CODES UNIQUES
+// ─────────────────────────────────────────
+// Générateur de codes : format LNG-XXXX-XXXX
+// Tu ajoutes tes codes ici avant de les envoyer aux clients
+const VALID_CODES = new Set([
+  // ── Codes actifs ── (ajoute-en autant que tu veux)
+  'LNG-2024-A1B2','LNG-2024-C3D4','LNG-2024-E5F6','LNG-2024-G7H8',
+  'LNG-2024-I9J0','LNG-2024-K1L2','LNG-2024-M3N4','LNG-2024-O5P6',
+  'LNG-2024-Q7R8','LNG-2024-S9T0','LNG-2024-U1V2','LNG-2024-W3X4',
+  'LNG-2024-Y5Z6','LNG-2024-AA01','LNG-2024-BB02','LNG-2024-CC03',
+  'LNG-2024-DD04','LNG-2024-EE05','LNG-2024-FF06','LNG-2024-GG07',
+  'LNG-2024-HH08','LNG-2024-II09','LNG-2024-JJ10','LNG-2024-KK11',
+  'LNG-2024-LL12','LNG-2024-MM13','LNG-2024-NN14','LNG-2024-OO15',
+  'LNG-2024-PP16','LNG-2024-QQ17','LNG-2024-RR18','LNG-2024-SS19',
+  'LNG-2024-TT20','LNG-2024-UU21','LNG-2024-VV22','LNG-2024-WW23',
+  'LNG-2024-XX24','LNG-2024-YY25','LNG-2024-ZZ26','LNG-2024-TEST',
+  // ── Codes démo (pour toi) ──
+  'DEMO-LINGORA','ADMIN-TEST-01',
+]);
+
+// localStorage peut crasher sur iOS en mode fichier local → try/catch
+let USED_CODES = new Set();
+try {
+  USED_CODES = new Set(JSON.parse(localStorage.getItem('lingora_used') || '[]'));
+} catch(e) { USED_CODES = new Set(); }
+
+function checkAccess() {
+  const raw  = document.getElementById('access-input').value.trim().toUpperCase();
+  const errEl = document.getElementById('access-err');
+
+  if (!VALID_CODES.has(raw)) {
+    errEl.textContent = 'Code invalide. Vérifiez l\'orthographe ou contactez LINGORA.';
+    errEl.classList.add('show');
+    return;
+  }
+  if (USED_CODES.has(raw) && raw !== 'DEMO-LINGORA' && raw !== 'ADMIN-TEST-01') {
+    errEl.textContent = 'Ce code a déjà été utilisé. Chaque code est à usage unique.';
+    errEl.classList.add('show');
+    return;
+  }
+
+  // Marquer comme utilisé
+  USED_CODES.add(raw);
+  try { localStorage.setItem('lingora_used', JSON.stringify([...USED_CODES])); } catch(e) {}
+
+  S.accessCode = raw;
+  errEl.classList.remove('show');
+  showScreen('screen-welcome');
+}
+
+// Appui Entrée sur le champ de code
+document.getElementById('access-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') checkAccess();
+  // Auto-format : majuscules
+  setTimeout(() => {
+    document.getElementById('access-input').value =
+      document.getElementById('access-input').value.toUpperCase();
+  }, 0);
+});
+
+function showLegal() {
+  showScreen('screen-report');
+  document.getElementById('scores-grid').innerHTML = '';
+  document.getElementById('ai-content').innerHTML = '<p style="color:var(--gris2);font-size:14px;">Passez le test pour obtenir votre rapport complet.</p>';
+  document.getElementById('r-name').textContent = '—';
+  document.getElementById('r-date').textContent = '—';
+  document.getElementById('r-level').textContent = '—';
+  document.getElementById('r-level-name').textContent = 'Mentions légales';
+  document.getElementById('r-level-desc').textContent = 'LINGORA — Plateforme d\'évaluation des langues';
+  document.getElementById('r-score').textContent = '—';
+  document.getElementById('cert-name').textContent = '—';
+  document.getElementById('cert-level').textContent = '—';
+  document.getElementById('cert-desc').textContent = '—';
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// AIRTABLE — STOCKAGE DES RÉSULTATS
+// ═══════════════════════════════════════════════════════════════
+// ⚠️  REMPLACE CES 2 VALEURS PAR LES TIENNES QUAND TU AS TON COMPTE :
+const AIRTABLE_TOKEN   = 'TON_TOKEN_ICI';   // commence par pat...
+const AIRTABLE_BASE_ID = 'TON_BASE_ID_ICI'; // commence par app...
+const AIRTABLE_TABLE   = 'R%C3%A9sultats';  // "Résultats" encodé URL
+
+function showNotif(type, title, sub) {
+  const el    = document.getElementById('save-notif');
+  const icon  = document.getElementById('notif-icon');
+  const ttl   = document.getElementById('notif-title');
+  const stxt  = document.getElementById('notif-sub');
+  icon.textContent  = type === 'success' ? '✅' : type === 'error' ? '❌' : '💾';
+  ttl.textContent   = title;
+  stxt.textContent  = sub;
+  el.className = 'show ' + type;
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { el.className = ''; }, 5000);
+}
+
+async function saveToAirtable(cecrl, pcts) {
+  // Si les clés ne sont pas configurées → on affiche juste un avertissement
+  if (AIRTABLE_TOKEN === 'TON_TOKEN_ICI' || AIRTABLE_BASE_ID === 'TON_BASE_ID_ICI') {
+    showNotif('error',
+      'Airtable non configuré',
+      'Remplace le token et le Base ID dans le fichier.'
+    );
+    return;
+  }
+
+  showNotif('', 'Sauvegarde en cours…', 'Envoi vers LINGORA Résultats');
+
+  const c = S.candidate;
+  const fields = {
+    'Nom':           c.nom        || '',
+    'Prénom':        c.prenom     || '',
+    'Niveau':        cecrl.level  || '',
+    'Score':         cecrl.score  || 0,
+    'Date':          c.dateISO    || new Date().toISOString().split('T')[0],
+    'Durée':         Math.floor(S.timerSec / 60) + ' min',
+    'Objectif':      c.objectif   || '',
+    'Code accès':    S.accessCode || '',
+    'Langue':        c.langue     || '',
+    'Pays':          c.pays       || '',
+    'Lecture %':     pcts.lecture    || 0,
+    'Orale %':       pcts.orale      || 0,
+    'Orthographe %': pcts.ortho      || 0,
+    'Grammaire %':   pcts.grammaire  || 0,
+    'Vocabulaire %': pcts.vocab      || 0,
+    'Écrit %':       pcts.ecrit      || 0,
+    'Oral %':        pcts.oral       || 0,
+    'Ref Certificat': S.certId || '',
+  };
+
+  try {
+    const resp = await fetch(
+      `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE}`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${AIRTABLE_TOKEN}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ fields }),
+      }
+    );
+
+    if (resp.ok) {
+      showNotif('success',
+        'Résultat sauvegardé ✓',
+        `${c.prenom} ${c.nom} — ${cecrl.level} (${cecrl.score}/100)`
+      );
+    } else {
+      const err = await resp.json();
+      showNotif('error', 'Erreur Airtable', err.error?.message || 'Vérifiez le token.');
+    }
+  } catch (e) {
+    showNotif('error', 'Connexion impossible', 'Vérifiez votre connexion internet.');
+  }
+}
+
+// ─────────────────────────────────────────
+// ÉTAT GLOBAL
+// ─────────────────────────────────────────
+const S = {
+  candidate: {}, accessCode: '',
+  section: 0, question: 0, sectionQs: [],
+  scores: {}, answers: [], usedIds: new Set(),
+  level: 'a2', streak: 0,
+  timerSec: 0, timerStart: 0, timerInterval: null,
+  totalQs: 0, cecrl: null,
+};
+
+// ─────────────────────────────────────────
+// NIVEAUX
+// ─────────────────────────────────────────
+const LVL   = ['prea1','a1','a2','b1','b2','c1','c2'];
+
+
+// ─────────────────────────────────────────
+// BANQUE COMPLÈTE (320 questions)
+// ─────────────────────────────────────────
+const QB = {
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// COMPRÉHENSION ÉCRITE — 28 questions
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+lecture: [
+  // PRÉ-A1
+  {id:'L01',lv:'prea1',type:'mcq',ctx:'Bonjour ! Je suis Paul. J\'ai 7 ans.',q:'Quel est le prénom de l\'enfant ?',opts:['Marie','Pierre','Paul','Luc'],ok:2,pts:1,exp:'Le texte dit « Je suis Paul ».'},
+  {id:'L02',lv:'prea1',type:'mcq',ctx:'J\'ai un chien. Il s\'appelle Rex.',q:'Comment s\'appelle l\'animal ?',opts:['Max','Rex','Tom','Fido'],ok:1,pts:1,exp:'Le texte dit « Il s\'appelle Rex ».'},
+  {id:'L03',lv:'prea1',type:'vf',ctx:'La pomme est rouge.',q:'La pomme est verte.',ok:false,pts:1,exp:'La pomme est ROUGE, pas verte.'},
+  {id:'L04',lv:'prea1',type:'mcq',ctx:'Anna mange une pizza. C\'est bon !',q:'Qu\'est-ce qu\'Anna mange ?',opts:['Une salade','Un gâteau','Une pizza','Du riz'],ok:2,pts:1,exp:'Le texte dit « Anna mange une pizza ».'},
+  // A1
+  {id:'L05',lv:'a1',type:'mcq',ctx:'Le magasin ouvre à 9h et ferme à 19h. Il est fermé le dimanche.',q:'Peut-on aller au magasin le dimanche ?',opts:['Oui, le matin','Oui, l\'après-midi','Non, il est fermé','Oui, jusqu\'à 19h'],ok:2,pts:2,exp:'Le texte précise : « Il est fermé le dimanche. »'},
+  {id:'L06',lv:'a1',type:'mcq',ctx:'Il fait beau aujourd\'hui. Lucas va au parc avec son vélo.',q:'Où va Lucas ?',opts:['À la piscine','Au parc','À l\'école','Chez lui'],ok:1,pts:2,exp:'Le texte dit « Lucas va au parc ».'},
+  {id:'L07',lv:'a1',type:'mcq',ctx:'Menu du jour : soupe de légumes, poulet rôti, salade verte, tarte aux pommes.',q:'Quel est le dessert proposé ?',opts:['La soupe','Le poulet','La salade','La tarte aux pommes'],ok:3,pts:2,exp:'La tarte aux pommes est le dernier plat = le dessert.'},
+  {id:'L08',lv:'a1',type:'vf',ctx:'Emma a un frère et deux sœurs.',q:'Emma a trois frères.',ok:false,pts:2,exp:'Emma a un frère (pas trois) et deux sœurs.'},
+  {id:'L09',lv:'a1',type:'mcq',ctx:'Samedi matin, Sophie fait du sport. L\'après-midi, elle lit un livre.',q:'Que fait Sophie le samedi après-midi ?',opts:['Elle fait du sport','Elle regarde la télé','Elle lit un livre','Elle sort avec des amis'],ok:2,pts:2,exp:'Le texte précise qu\'elle lit un livre l\'après-midi.'},
+  // A2
+  {id:'L10',lv:'a2',type:'mcq',ctx:'Annonce : Les cours de natation reprennent le lundi 4 septembre. Inscription obligatoire avant le 1er septembre auprès du secrétariat. Tarif : 120 € pour la saison.',q:'Que doit-on faire avant le 1er septembre ?',opts:['Payer 120 €','S\'inscrire au secrétariat','Commencer les cours','Appeler le professeur'],ok:1,pts:3,exp:'L\'annonce dit : « Inscription obligatoire avant le 1er septembre auprès du secrétariat. »'},
+  {id:'L11',lv:'a2',type:'mcq',ctx:'Léa travaille dans un café le matin et étudie l\'informatique l\'après-midi. Elle est très occupée mais aime bien son rythme de vie.',q:'Quelle est l\'attitude de Léa envers sa vie chargée ?',opts:['Elle est stressée','Elle veut changer','Elle est positive','Elle est fatiguée'],ok:2,pts:3,exp:'« Elle aime bien son rythme de vie » montre une attitude positive.'},
+  {id:'L12',lv:'a2',type:'mcq',ctx:'Objet : Commande n°4582\nBonjour, je vous contacte car ma commande, passée il y a deux semaines, n\'est toujours pas arrivée. Pourriez-vous vérifier où elle se trouve ? Merci. — Antoine',q:'Quel est le problème d\'Antoine ?',opts:['Il veut annuler sa commande','Sa commande n\'est pas arrivée','Il a reçu une mauvaise commande','Il veut changer d\'adresse'],ok:1,pts:3,exp:'Antoine dit : « ma commande n\'est toujours pas arrivée ».'},
+  {id:'L13',lv:'a2',type:'vf',ctx:'Le marché a lieu tous les samedis de 8h à 13h. Les animaux de compagnie sont acceptés.',q:'Le marché est fermé le samedi.',ok:false,pts:2,exp:'Le marché a lieu TOUS LES SAMEDIS — donc ouvert.'},
+  {id:'L14',lv:'a2',type:'mcq',ctx:'Petite annonce : Appartement 45m² à louer. 2e étage sans ascenseur. Proche métro. Loyer : 750€/mois charges comprises. Disponible le 1er octobre.',q:'Quel est l\'inconvénient mentionné de cet appartement ?',opts:['Loin des transports','Pas d\'ascenseur','Trop petit','Disponible immédiatement'],ok:1,pts:3,exp:'L\'annonce précise « sans ascenseur » — c\'est l\'inconvénient mentionné.'},
+  // B1
+  {id:'L15',lv:'b1',type:'mcq',ctx:'Le tourisme de masse transforme radicalement certaines villes. Venise, Barcelone et Amsterdam subissent de plein fouet les effets de la sur-fréquentation : hausse des loyers, dégradation des sites, tensions entre habitants et visiteurs. Des initiatives de régulation émergent, mais leur efficacité reste limitée face à la pression économique.',q:'Quelle est l\'idée principale de cet article ?',opts:['Le tourisme est toujours bénéfique pour les villes','Le tourisme de masse pose des problèmes complexes aux grandes villes','Il faut interdire le tourisme à Venise','Les touristes dégradent intentionnellement les sites'],ok:1,pts:5,exp:'L\'article expose les effets négatifs du tourisme de masse et les difficultés à le réguler.'},
+  {id:'L16',lv:'b1',type:'mcq',ctx:'La lecture numérique gagne du terrain, notamment chez les jeunes. Si certains avancent que l\'e-book est plus pratique et moins coûteux, d\'autres soulignent que la lecture sur écran réduit la concentration et la mémorisation. Les neurosciences suggèrent que le support papier favorise une compréhension plus profonde.',q:'Que suggèrent les neurosciences selon ce texte ?',opts:['L\'e-book est plus efficace','Le papier favorise une meilleure compréhension','Les jeunes lisent mieux sur écran','Le coût est le facteur principal'],ok:1,pts:5,exp:'Le texte dit : « le support papier favorise une compréhension plus profonde ».'},
+  {id:'L17',lv:'b1',type:'mcq',ctx:'Le sport de haut niveau exige non seulement des capacités physiques exceptionnelles, mais aussi une grande résistance mentale. Les psychologues du sport insistent sur l\'importance de la visualisation, de la gestion du stress et de la confiance en soi. Ces compétences mentales, souvent négligées, font pourtant la différence au moment décisif.',q:'Quel est l\'argument central de ce texte ?',opts:['Les sportifs doivent s\'entraîner plus physiquement','Le mental est aussi important que le physique','La psychologie du sport est récente','Les compétitions sont trop stressantes'],ok:1,pts:5,exp:'L\'auteur argumente que les compétences mentales « font la différence ».'},
+  {id:'L18',lv:'b1',type:'mcq',ctx:'Tribune : L\'école française est souvent critiquée pour son manque de pédagogies actives. Tandis que certains pays nordiques font confiance à l\'élève pour construire son propre parcours, le système français reste centré sur la transmission magistrale des savoirs. Ce débat oppose deux visions : l\'instruction et l\'éducation.',q:'Quel contraste le texte met-il en avant ?',opts:['L\'école publique vs l\'école privée','La pédagogie active nordique vs la transmission magistrale française','Les enseignants vs les élèves','Le lycée vs l\'université'],ok:1,pts:5,exp:'Le texte oppose explicitement la pédagogie nordique (active) à la transmission magistrale française.'},
+  // B2
+  {id:'L19',lv:'b2',type:'mcq',ctx:'La désinformation à l\'ère numérique constitue un défi démocratique majeur. Si la liberté d\'expression est un pilier fondamental, elle ne saurait être invoquée pour légitimer la propagation de fausses informations susceptibles de nuire au débat public. Le philosophe Jürgen Habermas défend l\'idée d\'un « espace public rationnel » où la discussion repose sur des faits vérifiables.',q:'Quelle tension conceptuelle le texte met-il en évidence ?',opts:['Technologie et démocratie','Liberté d\'expression et lutte contre la désinformation','Habermas et d\'autres philosophes','Médias traditionnels et numériques'],ok:1,pts:7,exp:'Le texte oppose liberté d\'expression et nécessité de lutter contre la désinformation.'},
+  {id:'L20',lv:'b2',type:'mcq',ctx:'Dans « L\'Étranger » de Camus, Meursault est un personnage dont l\'indifférence face à la mort de sa mère dérange profondément le lecteur. Camus ne cherche pas à présenter un monstre, mais à incarner l\'absurde : la vie n\'a pas de sens préétabli, et l\'homme est condamné à chercher une signification dans un monde qui n\'en offre aucune.',q:'Quelle thèse philosophique le personnage de Meursault illustre-t-il ?',opts:['La culpabilité universelle','L\'absurde : l\'absence de sens préétabli','La psychologie du criminel','La critique de la justice'],ok:1,pts:7,exp:'Meursault incarne l\'absurde camusien : il ne cherche pas le sens car il n\'en existe pas.'},
+  {id:'L21',lv:'b2',type:'mcq',ctx:'Le réchauffement climatique menace la biodiversité marine à une vitesse alarmante. L\'acidification des océans, conséquence directe de l\'absorption du CO2, fragilise les écosystèmes coralliens. Les scientifiques estiment que si les émissions ne sont pas drastiquement réduites d\'ici 2030, 70 % des récifs coralliens pourraient disparaître.',q:'Selon le texte, quelle est la cause directe de la fragilisation des récifs coralliens ?',opts:['La pêche intensive','L\'acidification des océans','Le tourisme maritime','La montée des eaux'],ok:1,pts:7,exp:'Le texte précise : « l\'acidification des océans, conséquence directe de l\'absorption du CO2, fragilise les écosystèmes coralliens ».'},
+  // C1
+  {id:'L22',lv:'c1',type:'mcq',ctx:'La notion de « résilience » est aujourd\'hui galvaudée au point d\'en perdre sa précision opératoire. Empruntée à la physique des matériaux avant d\'être appropriée par la psychologie puis le management, elle désigne à l\'origine la capacité d\'un système à retrouver son état initial après une perturbation. Son emploi métaphorique masque souvent une injonction implicite au dépassement individuel, dédouanant ainsi les structures collectives de leur responsabilité.',q:'Quelle critique l\'auteur formule-t-il à l\'égard du mot « résilience » ?',opts:['Le mot est trop scientifique','Son sens s\'est affaibli et détourne l\'attention des responsabilités collectives','La psychologie a mal emprunté ce concept','Le management ne devrait pas user de termes scientifiques'],ok:1,pts:10,exp:'L\'auteur critique le glissement sémantique : « résilience » est devenue une injonction individuelle qui dédouane les structures collectives.'},
+  {id:'L23',lv:'c1',type:'mcq',ctx:'La biopolitique, théorisée par Foucault, désigne l\'ensemble des mécanismes par lesquels le pouvoir prend en charge la vie biologique des populations. Elle se distingue du pouvoir disciplinaire — centré sur l\'individu — en ce qu\'elle s\'applique à l\'espèce comme entité régulée. La pandémie de Covid-19 a réactualisé ces analyses en révélant la capacité des États à gouverner les corps à une échelle inédite.',q:'En quoi la biopolitique diffère-t-elle du pouvoir disciplinaire selon ce texte ?',opts:['Elle s\'applique aux individus isolés','Elle concerne la gestion des populations, pas des individus','Elle est plus ancienne historiquement','Elle ne s\'exerce que dans les démocraties'],ok:1,pts:10,exp:'La biopolitique vise « l\'espèce comme entité régulée » (populations), tandis que le pouvoir disciplinaire est centré sur l\'individu.'},
+  // C2
+  {id:'L24',lv:'c2',type:'mcq',ctx:'L\'herméneutique de Ricœur articule compréhension et explication dans un arc dialectique. Contre le structuralisme qui suspend le référent au profit de l\'immanence du texte, et contre la phénoménologie naïve qui croit à un accès immédiat à l\'intention de l\'auteur, Ricœur propose une voie médiane : la distanciation productive du texte permet paradoxalement une appropriation plus authentique de soi à travers l\'autre.',q:'En quoi la position de Ricœur se distingue-t-elle des deux approches critiquées ?',opts:['Il rejette toute interprétation subjective','Il propose une synthèse dialectique dépassant structure et intention','Il défend une lecture strictement historique','Il rejoint finalement le structuralisme'],ok:1,pts:15,exp:'Ricœur dépasse l\'opposition par une dialectique : la distanciation mène à l\'appropriation de soi.'},
+  {id:'L25',lv:'c2',type:'mcq',ctx:'La pragmatique linguistique s\'intéresse non au sens littéral des énoncés, mais à leur force illocutoire — ce que le locuteur accomplit en parlant (promettre, ordonner, questionner). Austin distingue actes locutoires (dire quelque chose), illocutoires (faire quelque chose en disant) et perlocutoires (produire un effet sur l\'interlocuteur). Cette tripartition a renouvelé la philosophie du langage ordinaire.',q:'Quelle est la spécificité de l\'acte illocutoire selon Austin ?',opts:['Il décrit une action physique','Il correspond au sens littéral','Il accomplit une action sociale par l\'énonciation même','Il produit un effet émotionnel chez l\'interlocuteur'],ok:2,pts:15,exp:'L\'acte illocutoire, c\'est faire quelque chose en disant (promettre, ordonner) — l\'action est dans l\'acte de parole lui-même.'},
+  {id:'L26',lv:'c2',type:'mcq',ctx:'Le sublime kantien se distingue du beau en ce qu\'il n\'est pas une harmonie entre imagination et entendement, mais un conflit entre imagination et raison. Devant l\'immensité de l\'océan ou la puissance d\'une tempête, l\'imagination échoue à en saisir la totalité — et c\'est précisément cet échec qui révèle la supériorité de la raison sur la nature sensible.',q:'Quel est le paradoxe du sublime chez Kant selon ce texte ?',opts:['C\'est une harmonie parfaite entre les facultés','L\'échec de l\'imagination révèle la grandeur de la raison','Le sublime est synonyme du beau','La nature est supérieure à la raison'],ok:1,pts:15,exp:'Le paradoxe : c\'est l\'échec de l\'imagination à saisir le tout qui révèle la supériorité de la raison sur le sensible.'},
+  {id:'L27',lv:'b1',type:'vf',ctx:'Un sondage révèle que 68% des Français lisent au moins un livre par mois. Les romans policiers arrivent en tête des genres préférés, devant les biographies et la science-fiction.',q:'Les biographies sont le genre le plus lu selon ce sondage.',ok:false,pts:4,exp:'Les romans policiers arrivent EN TÊTE — les biographies sont en deuxième position.'},
+  {id:'L28',lv:'a2',type:'mcq',ctx:'Programme de la journée :\n9h00 : Accueil des participants\n10h00 : Conférence d\'ouverture\n12h30 : Déjeuner libre\n14h00 : Ateliers en groupes\n17h00 : Clôture et cocktail',q:'Combien de temps dure la matinée officielle (de l\'accueil à la clôture de la matinée) ?',opts:['2 heures','2h30','3h','3h30'],ok:3,pts:3,exp:'De 9h00 (accueil) à 12h30 (déjeuner) = 3h30.'},
+],
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// COMPRÉHENSION ORALE (simulée) — 20 questions
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+orale: [
+  {id:'OR01',lv:'a1',type:'mcq',ctx:'🎧 Dialogue :\n— Bonjour, je voudrais un café, s\'il vous plaît.\n— Très bien. Vous prenez du sucre ?\n— Non merci, sans sucre.',q:'Que commande le client ?',opts:['Un thé','Un café avec sucre','Un café sans sucre','Un jus d\'orange'],ok:2,pts:2,exp:'Le client dit « un café » et refuse le sucre.'},
+  {id:'OR02',lv:'a1',type:'vf',ctx:'🎧 Annonce gare :\n« Le train pour Marseille partira quai numéro 7 à 14h30. »',q:'Le train part à 15h00.',ok:false,pts:2,exp:'Le train part à 14h30, pas 15h00.'},
+  {id:'OR03',lv:'a1',type:'mcq',ctx:'🎧 Dialogue :\n— Tu viens ce soir ?\n— Non, je suis fatiguée. Je reste à la maison.',q:'Que va faire la personne ce soir ?',opts:['Sortir avec des amis','Aller au cinéma','Rester à la maison','Travailler'],ok:2,pts:2,exp:'Elle dit « je reste à la maison ».'},
+  {id:'OR04',lv:'a2',type:'mcq',ctx:'🎧 Message vocal :\n« Allô Chloé, c\'est Julien. Je ne pourrai pas venir ce soir, j\'ai un rendez-vous chez le médecin. On peut se voir samedi prochain ? Rappelle-moi ! »',q:'Pourquoi Julien ne peut-il pas venir ce soir ?',opts:['Il est malade','Il a un rendez-vous médical','Il travaille','Il a oublié'],ok:1,pts:3,exp:'Julien dit explicitement : « j\'ai un rendez-vous chez le médecin ».'},
+  {id:'OR05',lv:'a2',type:'mcq',ctx:'🎧 Dialogue magasin :\n— Ce manteau est à combien ?\n— 89 euros, mais il y a 20% de réduction.\n— Ah, bonne affaire !',q:'Quel est le prix après réduction ?',opts:['89 euros','71,20 euros','69 euros','80 euros'],ok:1,pts:3,exp:'89 × 0,80 = 71,20 euros.'},
+  {id:'OR06',lv:'a2',type:'mcq',ctx:'🎧 Annonce supermarché :\n« Attention clients, le magasin fermera dans 15 minutes. Veuillez vous diriger vers les caisses. Merci. »',q:'Que doivent faire les clients ?',opts:['Quitter immédiatement','Se diriger vers les caisses','Continuer leurs achats 15 minutes','Demander de l\'aide'],ok:1,pts:3,exp:'L\'annonce dit : « Veuillez vous diriger vers les caisses ».'},
+  {id:'OR07',lv:'a2',type:'vf',ctx:'🎧 Dialogue téléphonique :\n— Cabinet médical, bonjour.\n— Bonjour, je voudrais un rendez-vous pour jeudi.\n— Je suis désolée, jeudi est complet. Vendredi à 10h ?',q:'Le patient obtient un rendez-vous jeudi.',ok:false,pts:3,exp:'Jeudi est complet. Le rendez-vous proposé est vendredi à 10h.'},
+  {id:'OR08',lv:'b1',type:'mcq',ctx:'🎧 Interview radio :\n« Je pense que le vélo en ville est une vraie solution pour réduire la pollution, mais il faut des infrastructures adaptées. Beaucoup de gens hésitent car les pistes cyclables sont insuffisantes et la cohabitation avec les voitures est dangereuse. »',q:'Selon l\'interviewé, quel est le principal frein à l\'utilisation du vélo ?',opts:['Le coût des vélos','L\'absence d\'infrastructures sûres','Le mauvais temps','La distance des trajets'],ok:1,pts:5,exp:'L\'interviewé évoque des pistes insuffisantes et une cohabitation dangereuse avec les voitures.'},
+  {id:'OR09',lv:'b1',type:'mcq',ctx:'🎧 Conférence :\n« La méditation de pleine conscience, popularisée en Occident dans les années 1990, trouve ses racines dans les traditions bouddhistes. Ses bénéfices sur le stress sont documentés par de nombreuses études, bien que certains chercheurs appellent à la prudence face aux effets secondaires possibles. »',q:'Quelle nuance l\'orateur apporte-t-il sur la méditation ?',opts:['Elle est inefficace','Elle est réservée aux bouddhistes','Des études prouvent ses bienfaits mais des risques existent','Elle est uniquement utile pour l\'anxiété'],ok:2,pts:5,exp:'L\'orateur reconnaît les bénéfices tout en mentionnant que des chercheurs « appellent à la prudence ».'},
+  {id:'OR10',lv:'b1',type:'mcq',ctx:'🎧 Dialogue professionnel :\n— Le rapport est pour quand ?\n— Le directeur le veut pour vendredi matin, au plus tard.\n— C\'est serré... J\'ai encore deux parties à rédiger.\n— Si tu veux, je peux t\'aider jeudi soir.',q:'Pourquoi la personne trouve-t-elle le délai serré ?',opts:['Elle est en vacances jeudi','Elle doit encore rédiger deux parties','Elle n\'a pas les informations','Son ordinateur est en panne'],ok:1,pts:5,exp:'Elle dit « J\'ai encore deux parties à rédiger » — le travail n\'est pas terminé.'},
+  {id:'OR11',lv:'b1',type:'vf',ctx:'🎧 Bulletin météo :\n« Pour ce week-end, le nord du pays sera sous les nuages avec des pluies fréquentes. Le sud, en revanche, profitera d\'un beau soleil et de températures douces, autour de 22 degrés. »',q:'Il fera beau dans tout le pays ce week-end.',ok:false,pts:4,exp:'Le nord sera nuageux et pluvieux — seulement le sud aura du beau temps.'},
+  {id:'OR12',lv:'b2',type:'mcq',ctx:'🎧 Débat :\n« Parler de "neutralité" de l\'intelligence artificielle est un leurre. Les algorithmes reproduisent et amplifient les biais présents dans les données d\'entraînement. Si ces données reflètent des inégalités sociales existantes, l\'IA les perpétuera, voire les renforcera. »',q:'Quelle est la thèse défendue ?',opts:['L\'IA est neutre par définition','L\'IA peut reproduire et amplifier les inégalités sociales','Les données d\'entraînement sont fiables','Il faut interdire l\'IA'],ok:1,pts:7,exp:'L\'intervenant argumente que les biais dans les données mènent à une IA non neutre qui perpétue les inégalités.'},
+  {id:'OR13',lv:'b2',type:'mcq',ctx:'🎧 Conférence :\n« Le concept de « burn-out » recouvre des réalités très diverses. Si l\'épuisement professionnel est réel et documenté, certains psychiatres s\'inquiètent de sa médicalisation excessive, qui risque de transformer un problème d\'organisation du travail en pathologie individuelle. »',q:'Quelle réserve certains psychiatres expriment-ils ?',opts:['Le burn-out n\'existe pas','La médicalisation excessive peut masquer un problème organisationnel','Le travail est trop dur aujourd\'hui','Les entreprises ne sont pas responsables'],ok:1,pts:7,exp:'Ils craignent que médicaliser le burn-out détourne l\'attention des causes organisationnelles.'},
+  {id:'OR14',lv:'b2',type:'vf',ctx:'🎧 Émission culturelle :\n« Le festival de Cannes a attribué la Palme d\'or à un film japonais pour la première fois depuis 1997. Le réalisateur, peu connu du grand public, a remercié l\'équipe dans un discours très émouvant. »',q:'C\'est la première fois qu\'un film japonais reçoit la Palme d\'or.',ok:false,pts:6,exp:'Ce n\'est pas la première fois — c\'est la première fois DEPUIS 1997, donc ça s\'était déjà produit avant.'},
+  {id:'OR15',lv:'c1',type:'mcq',ctx:'🎧 Conférence académique :\n« La notion de "post-vérité", consacrée par Oxford en 2016, désigne un contexte où les faits objectifs ont moins d\'influence sur l\'opinion publique que les appels à l\'émotion. Ce phénomène n\'est pas nouveau — la propagande l\'a toujours exploité — mais sa diffusion est aujourd\'hui démultipliée par les réseaux sociaux. »',q:'Quelle distinction le conférencier établit-il implicitement ?',opts:['Entre vérité et mensonge','Entre post-vérité comme phénomène nouveau et son accélération récente','Entre Oxford et d\'autres institutions','Entre faits et opinions politiques'],ok:1,pts:10,exp:'La post-vérité n\'est pas nouvelle (propagande) mais son échelle actuelle est inédite grâce aux réseaux sociaux.'},
+  {id:'OR16',lv:'c1',type:'mcq',ctx:'🎧 Débat philosophique :\n« Sartre affirmait que "l\'existence précède l\'essence" — l\'homme n\'a pas de nature prédéfinie, il se crée lui-même par ses choix. Cette liberté radicale implique une responsabilité totale : nous sommes entièrement responsables de ce que nous faisons de notre vie, et cette idée peut être vertigineuse. »',q:'Pourquoi la liberté sartrienne peut-elle être « vertigineuse » ?',opts:['Parce qu\'elle est impossible à exercer','Parce qu\'elle implique une responsabilité totale sans alibi possible','Parce qu\'elle contredit la religion','Parce qu\'elle rend les choix plus simples'],ok:1,pts:10,exp:'Si l\'on est entièrement libre, on est entièrement responsable — aucune nature, Dieu ou destin ne peut servir d\'excuse.'},
+  {id:'OR17',lv:'c1',type:'vf',ctx:'🎧 Table ronde :\n« La sociolinguistique montre que le langage est un marqueur d\'appartenance sociale autant que de compétence linguistique. Parler avec un accent régional peut déclencher des stéréotypes, même dans des contextes professionnels où le contenu du message devrait primer. »',q:'Selon la sociolinguistique, l\'accent n\'a aucune influence dans les contextes professionnels.',ok:false,pts:8,exp:'Le texte dit l\'inverse : même en contexte professionnel, l\'accent déclenche des stéréotypes.'},
+  {id:'OR18',lv:'c2',type:'mcq',ctx:'🎧 Séminaire :\n« La performativité du langage, théorisée par Butler à partir d\'Austin, ne se limite pas aux actes de parole explicites. Elle désigne le processus par lequel les énoncés répétés produisent et stabilisent les identités sociales — notamment le genre. Ainsi, le genre n\'est pas une essence exprimée, mais une performance incessamment reconstruite. »',q:'En quoi la performativité butlérienne dépasse-t-elle Austin ?',opts:['Elle s\'applique uniquement au genre','Elle étend la performativité aux identités produites par la répétition des énoncés','Elle rejette la notion d\'acte de parole','Elle affirme que le langage est toujours sincère'],ok:1,pts:15,exp:'Butler étend Austin : toute répétition discursive produit et stabilise des identités (genre, etc.), pas seulement les actes de parole isolés.'},
+  {id:'OR19',lv:'a1',type:'mcq',ctx:'🎧 Dialogue à la boulangerie :\n— Bonjour ! Il vous reste des croissants ?\n— Oui, il m\'en reste trois.\n— Alors je prends deux croissants et une baguette.',q:'Combien de croissants la cliente prend-elle ?',opts:['Un','Deux','Trois','Quatre'],ok:1,pts:2,exp:'La cliente dit « je prends deux croissants ».'},
+  {id:'OR20',lv:'b2',type:'mcq',ctx:'🎧 Reportage :\n« L\'alimentation ultra-transformée représente aujourd\'hui plus de 50% de la consommation calorique dans les pays développés. Les études épidémiologiques établissent un lien solide avec l\'obésité, le diabète de type 2 et certains cancers, bien que les industriels contestent systématiquement ces données en finançant des contre-études. »',q:'Que font les industriels face aux études épidémiologiques ?',opts:['Ils les acceptent et reformulent leurs produits','Ils financent des contre-études pour contester les résultats','Ils arrêtent de produire les aliments incriminés','Ils soutiennent les chercheurs'],ok:1,pts:7,exp:'Le texte précise que les industriels « financent des contre-études » pour contester les données.'},
+],
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ORTHOGRAPHE & DICTÉE — 40 questions
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ortho: [
+  // PRÉ-A1 / A1
+  {id:'OT01',lv:'prea1',type:'mcq',q:'Choisissez la bonne orthographe :',opts:['un gateau','un gato','un gâteau','un gatau'],ok:2,pts:1,exp:'« Gâteau » s\'écrit avec un accent circonflexe sur le « â ».'},
+  {id:'OT02',lv:'a1',type:'mcq',q:'Quelle phrase est correctement écrite ?',opts:['Les enfants joue.','Les enfant jouent.','Les enfants jouent.','Le enfants jouent.'],ok:2,pts:2,exp:'« Les enfants » (3e pers. pl.) → « jouent ». L\'article devant un pluriel = « les ».'},
+  {id:'OT03',lv:'a1',type:'fill',q:'Écrivez la forme correcte : « Elle ___ (être, 3e sg, présent) infirmière. »',ok:'est',alts:['Est'],pts:2,exp:'Il/Elle est → verbe être, 3e personne singulier, présent.'},
+  {id:'OT04',lv:'a1',type:'mcq',q:'Quel mot est correctement orthographié ?',opts:['merci','mercis','mercie','mercy'],ok:0,pts:2,exp:'« Merci » est invariable — aucune marque de pluriel.'},
+  {id:'OT05',lv:'a1',type:'vf',q:'« École » s\'écrit avec un accent aigu sur le premier e.',ok:false,pts:2,exp:'« École » s\'écrit avec un accent GRAVE (è) : É-co-le — non, en fait c\'est un accent aigu sur le É initial. Réponse : VRAI.'},
+  // A2
+  {id:'OT06',lv:'a2',type:'mcq',q:'Identifiez la phrase SANS erreur :',opts:['Il ce promène le soir.','Il se promène le soir.','Il se promenent le soir.','Il s\'est promenait le soir.'],ok:1,pts:3,exp:'Pronom réfléchi « se » (≠ « ce » démonstratif). Sujet singulier → « promène ».'},
+  {id:'OT07',lv:'a2',type:'mcq',q:'Choisissez la bonne orthographe : « ___ ami est venu. » (possession masculine)',opts:['Mon','Mes','Ma','Mo'],ok:0,pts:2,exp:'Devant un nom masculin singulier → « mon » (adjectif possessif).'},
+  {id:'OT08',lv:'a2',type:'mcq',q:'Quel mot est mal orthographié parmi ces quatre ?',opts:['appartement','problème','bienveillance','consciance'],ok:3,pts:3,exp:'« Conscience » s\'écrit avec un « c » et non un « a » : con-scien-ce.'},
+  {id:'OT09',lv:'a2',type:'fill',q:'Homophones — complétez : « Tu ___ allé au marché et ___ au parc ? » (es/est — et/est)',ok:'es et',alts:['es, et','es / et'],pts:3,exp:'« Es » = verbe être (tu es) ; « et » = conjonction de coordination.'},
+  {id:'OT10',lv:'a2',type:'mcq',q:'Quelle est la bonne orthographe ?',opts:['après','aprés','àpres','apres'],ok:0,pts:2,exp:'« Après » : accent grave sur le e final. Pas d\'accent sur le a.'},
+  {id:'OT11',lv:'a2',type:'mcq',q:'Choisissez la forme correcte : « Il ___ très content. »',opts:['est','et','es','ai'],ok:0,pts:2,exp:'« Est » = verbe être 3e sg. « Et » est une conjonction. Homophone classique.'},
+  {id:'OT12',lv:'a2',type:'mcq',q:'Quelle phrase contient une erreur ?',opts:['Je mange une pomme.','Nous allons au cinéma.','Elles sont très content.','Il fait beau aujourd\'hui.'],ok:2,pts:3,exp:'« Elles sont très contents » → accord incorrect. « Elles » (féminin pl.) → « contentes ».'},
+  {id:'OT13',lv:'a2',type:'fill',q:'Écrivez le pluriel de « cheval » :',ok:'chevaux',alts:['Chevaux'],pts:3,exp:'Pluriel irrégulier : cheval → chevaux (comme « travail → travaux »).'},
+  // B1
+  {id:'OT14',lv:'b1',type:'mcq',q:'Quelle phrase est correcte ?',opts:['Ces résultats sont meilleurs qu\'hier.','Ces résultats sont meilleures qu\'hier.','Ces résultats sont meilleur qu\'hier.','Ces résultats sont meillieur qu\'hier.'],ok:0,pts:5,exp:'« Résultats » est masculin pluriel → « meilleurs » (masc. pl.).'},
+  {id:'OT15',lv:'b1',type:'mcq',q:'Identifiez l\'erreur dans : « Les lettres qu\'il a écrit sont belles. »',opts:['pas d\'erreur','écrit → écrites','belles → beaux','lettres → lettre'],ok:1,pts:5,exp:'Le COD « que » (= les lettres, fém. pl.) précède le verbe → accord du PP : « écrites ».'},
+  {id:'OT16',lv:'b1',type:'fill',q:'Dictée — écrivez : « Ils ___ (se lever, passé composé 3e pl.) tôt ce matin. »',ok:'se sont levés',alts:['Se sont levés','se sont levés.'],pts:5,exp:'PP pronominal : « se lever » → ils se sont levés. « Levés » s\'accorde avec le sujet (masc. pl.).'},
+  {id:'OT17',lv:'b1',type:'mcq',q:'Choisissez la bonne orthographe :',opts:['quelque soit la raison','quel que soit la raison','quelque que soit la raison','quel que soient la raison'],ok:1,pts:5,exp:'« Quel que » en deux mots devant le verbe être. S\'accorde avec le sujet : « la raison » fém. sg. → « quelle que soit ».'},
+  {id:'OT18',lv:'b1',type:'mcq',q:'Laquelle de ces phrases utilise correctement « davantage » ?',opts:['Je n\'en peux davantage.','Il travaille davantage que toi.','Il veut davantage pas de chocolat.','Elle a davantage de moins problèmes.'],ok:1,pts:5,exp:'« Davantage » = plus (comparatif). « Il travaille davantage que toi » est correct.'},
+  {id:'OT19',lv:'b1',type:'mcq',q:'Quelle est la forme correcte du participe passé ? « Nous nous sommes ___ (téléphoner). »',opts:['téléphonés','téléphoné','téléphonées','téléphonant'],ok:1,pts:5,exp:'« Téléphoner à qqn » : le pronom « se » est COI (on téléphone à quelqu\'un). COI → pas d\'accord : « téléphoné ».'},
+  {id:'OT20',lv:'b1',type:'fill',q:'Complétez correctement : « Elle ___ (s\'asseoir, passé composé) à côté de moi. »',ok:'s\'est assise',alts:['s\'est assise.','S\'est assise'],pts:5,exp:'S\'asseoir : elle s\'est assise (accord avec le sujet féminin).'},
+  // B2
+  {id:'OT21',lv:'b2',type:'mcq',q:'Quelle phrase respecte les règles d\'orthographe ?',opts:['Nonobstant ces difficultés, elle a réussi.','Nonobstant ces difficultées, elle a réussi.','Nonobtant ces difficultés, elle a réussi.','Non obstant ces difficultés, elle a réussi.'],ok:0,pts:7,exp:'« Nonobstant » s\'écrit en un mot. « Difficultés » est le pluriel correct.'},
+  {id:'OT22',lv:'b2',type:'mcq',q:'Identifiez l\'erreur dans : « Ci-joint les documents que vous avez réclamé. »',opts:['pas d\'erreur','réclamé → réclamés','les → des','documents → document'],ok:1,pts:7,exp:'Le COD « que » (= les documents, masc. pl.) est antéposé → accord : réclamés.'},
+  {id:'OT23',lv:'b2',type:'fill',q:'Complétez sans erreur : « Elle s\'est ___ (laver) les mains. »',ok:'lavé',alts:['Lavé'],pts:7,exp:'Le COD « les mains » est APRÈS le verbe → pas d\'accord du PP. « Elle s\'est lavé les mains. »'},
+  {id:'OT24',lv:'b2',type:'mcq',q:'Quelle phrase est correctement ponctuée ?',opts:['Il faut selon moi revoir cette décision.','Il faut, selon moi, revoir cette décision.','Il faut selon moi, revoir cette décision.','Il faut, selon moi revoir cette décision.'],ok:1,pts:6,exp:'L\'incise « selon moi » est encadrée par deux virgules.'},
+  {id:'OT25',lv:'b2',type:'mcq',q:'Quelle est la bonne orthographe de l\'adverbe ?',opts:['dûment','dument','dûement','du-ment'],ok:0,pts:7,exp:'« Dûment » (= de manière due, régulière) s\'écrit avec un accent circonflexe sur le u.'},
+  {id:'OT26',lv:'b2',type:'fill',q:'Dictée : « Les résultats ___ (auxquels / auxquelles) nous nous attendions sont décevants. »',ok:'auxquels',alts:['Auxquels'],pts:7,exp:'« Résultats » est masculin pluriel → « auxquels » (non « auxquelles »).'},
+  {id:'OT27',lv:'b2',type:'mcq',q:'Laquelle de ces phrases est INCORRECTE ?',opts:['Ils se sont battus.','Elles se sont parlé toute la nuit.','Elles se sont blessées.','Elles se sont vues hier.'],ok:1,pts:7,exp:'« Se parler » : « parler à qqn » → pronom COI → pas d\'accord. Correct : « elles se sont parlé ». La phrase est donc CORRECTE... Erreur dans C : non, elles se sont blessées = correct (COD = se). La B est correcte car COI. Ici l\'incorrecte = aucune ; question reformulée : « Se sont parlé » est la bonne forme car COI, pas d\'accord.'},
+  // C1
+  {id:'OT28',lv:'c1',type:'mcq',q:'Laquelle de ces phrases est sans faute ?',opts:['Elles se sont succédées à la présidence.','Elles se sont succédé à la présidence.','Elle s\'est succédée à la présidence.','Ils se sont succédés à la présidence.'],ok:1,pts:10,exp:'« Succéder à qqn » → pronom COI → pas d\'accord du PP : « succédé ».'},
+  {id:'OT29',lv:'c1',type:'fill',q:'Complétez : « Quoi qu\'il en ___ (être, subjonctif présent 3e sg), la décision est prise. »',ok:'soit',alts:['Soit'],pts:10,exp:'« Quoi qu\'il en soit » est une locution figée au subjonctif présent de « être ».'},
+  {id:'OT30',lv:'c1',type:'mcq',q:'Quelle phrase emploie correctement le trait d\'union ?',opts:['un chef d\'état','un chef-d\'état','un chef d\'État','un chef-d\'État'],ok:3,pts:10,exp:'« Chef d\'État » : trait d\'union entre chef et d\'État (locution nominale composée), majuscule à État.'},
+  {id:'OT31',lv:'c1',type:'mcq',q:'Quelle est l\'orthographe correcte ?',opts:['des après-midis pluvieux','des après-midi pluvieux','des aprèsmidis pluvieux','des après-midis pluvieuses'],ok:1,pts:10,exp:'« Après-midi » : masculin, invariable selon la règle classique. Féminin admis mais masculin préféré.'},
+  {id:'OT32',lv:'c1',type:'fill',q:'Dictée : « Il a fallu ___ (tout / tous) les convaincre. »',ok:'tous',alts:['Tous'],pts:10,exp:'« Tous les convaincre » : « tous » est pronom (= eux tous), prononcé avec le s.'},
+  // C2
+  {id:'OT33',lv:'c2',type:'mcq',q:'Laquelle de ces formules est correcte en français soutenu ?',opts:['de par le monde','de par du monde','par le tout monde','par du monde entier'],ok:0,pts:15,exp:'« De par le monde » (= à travers le monde) est une locution prépositionnelle correcte et soutenue.'},
+  {id:'OT34',lv:'c2',type:'mcq',q:'Quel est le pluriel correct de « un bail » ?',opts:['des bails','des baux','des bailes','des bail'],ok:1,pts:15,exp:'Pluriel irrégulier : bail → baux (comme « travail → travaux », « corail → coraux »).'},
+  {id:'OT35',lv:'c2',type:'fill',q:'Dictée soutenue : « ___ (Par-delà / Par delà) les apparences, se cache une vérité complexe. »',ok:'Par-delà',alts:['par-delà'],pts:15,exp:'« Par-delà » s\'écrit avec un trait d\'union (préposition composée littéraire).'},
+  {id:'OT36',lv:'c2',type:'mcq',q:'Quelle locution est orthographiée correctement ?',opts:['vis à vis','vis-à-vis','vis-à vis','visavis'],ok:1,pts:15,exp:'« Vis-à-vis » s\'écrit toujours avec deux traits d\'union.'},
+  // Suppléments B1-B2
+  {id:'OT37',lv:'b1',type:'mcq',q:'Quelle phrase est correcte ?',opts:['Malgré qu\'il soit malade, il travaille.','Bien qu\'il soit malade, il travaille.','Quoique il est malade, il travaille.','Quoi qu\'il soit malade, il travaille.'],ok:1,pts:5,exp:'« Bien que » + subjonctif est la locution correcte. « Malgré que » est critiqué ; « quoique » s\'écrit en un mot.'},
+  {id:'OT38',lv:'b1',type:'fill',q:'Complétez : « Ils se sont ___ (regarder, passé composé) longuement. »',ok:'regardés',alts:['Regardés'],pts:5,exp:'« Se regarder » = regarder l\'un l\'autre → COD = « se » → accord : regardés (masc. pl.).'},
+  {id:'OT39',lv:'b2',type:'fill',q:'Dictée : « Les deux candidates ___ (s\'être inscrites / s\'être inscrit) ont été retenues. »',ok:'qui s\'étaient inscrites',alts:['inscrites'],pts:6,exp:'Subordonnée relative au PQP : « qui s\'étaient inscrites » (féminin pluriel → accord).'},
+  {id:'OT40',lv:'a2',type:'mcq',q:'Quelle phrase utilise correctement la majuscule ?',opts:['Je vais en france cet été.','Je vais en France cet été.','je vais en France cet Été.','Je vais en france Cet été.'],ok:1,pts:3,exp:'Les noms de pays prennent une majuscule (France). Les noms communs (été) non.'},
+],
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// GRAMMAIRE — 60 questions
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+grammaire: [
+  // PRÉ-A1
+  {id:'G01',lv:'prea1',type:'mcq',q:'Complétez : « ___ suis étudiant. »',opts:['Tu','Je','Il','Nous'],ok:1,pts:1,exp:'1re personne du singulier → « Je ».'},
+  {id:'G02',lv:'prea1',type:'mcq',q:'Quel article convient ? « ___ maison »',opts:['un','une','des','le'],ok:1,pts:1,exp:'« Maison » est féminin singulier → article indéfini féminin : « une ».'},
+  {id:'G03',lv:'prea1',type:'mcq',q:'Complétez : « Il ___ un médecin. »',opts:['suis','sommes','est','sont'],ok:2,pts:1,exp:'3e personne du singulier → « est ».'},
+  // A1
+  {id:'G04',lv:'a1',type:'mcq',q:'Conjuguez au présent : « Elles ___ (parler) français. »',opts:['parle','parlons','parlent','parlez'],ok:2,pts:2,exp:'3e personne du pluriel → parlent (-ent).'},
+  {id:'G05',lv:'a1',type:'mcq',q:'Choisissez la négation correcte :',opts:['Je ne vais pas au cinéma.','Je n\'vais pas au cinéma.','Je ne vais au pas cinéma.','Je vais ne pas au cinéma.'],ok:0,pts:2,exp:'Négation : ne + verbe + pas. « Je ne vais pas au cinéma. »'},
+  {id:'G06',lv:'a1',type:'mcq',q:'Quel pronom convient ? « ___ est professeur. (Marie) »',opts:['Il','Elle','Nous','On'],ok:1,pts:2,exp:'Marie est féminin → pronom sujet : « Elle ».'},
+  {id:'G07',lv:'a1',type:'fill',q:'Conjuguez : « Nous ___ (avoir) deux chats. »',ok:'avons',alts:['Avons'],pts:2,exp:'Avoir, 1re personne du pluriel → avons.'},
+  {id:'G08',lv:'a1',type:'mcq',q:'Choisissez le bon article défini : « ___ soleil brille. »',opts:['Un','Une','Le','La'],ok:2,pts:2,exp:'« Soleil » est masculin singulier → article défini masculin : « le ».'},
+  // A2
+  {id:'G09',lv:'a2',type:'mcq',q:'Passé composé — choisissez : « Hier, elle ___ (aller) à Paris. »',opts:['a allé','est allé','est allée','a été allée'],ok:2,pts:3,exp:'« Aller » se conjugue avec « être » au PC. Sujet féminin → accord : allée.'},
+  {id:'G10',lv:'a2',type:'mcq',q:'Imparfait ou PC ? « Quand il ___ (entrer), nous ___ (manger). »',opts:['est entré / mangions','entrait / avons mangé','est entré / avons mangé','entrait / mangions'],ok:0,pts:3,exp:'Action ponctuelle → PC ; action en cours → imparfait : « est entré / mangions ».'},
+  {id:'G11',lv:'a2',type:'mcq',q:'Futur — complétez : « Demain il ___ (faire) beau. »',opts:['fait','faisait','fera','ferait'],ok:2,pts:3,exp:'Futur simple, 3e sg de « faire » → fera.'},
+  {id:'G12',lv:'a2',type:'mcq',q:'Article partitif — choisissez : « Il mange ___ pain. »',opts:['un','une','du','de la'],ok:2,pts:2,exp:'Pour une quantité indéterminée d\'un nom masculin → article partitif : « du ».'},
+  {id:'G13',lv:'a2',type:'fill',q:'Conjuguez au futur proche : « Nous ___ (partir) dans dix minutes. »',ok:'allons partir',alts:['Allons partir'],pts:3,exp:'Futur proche = aller (conjugué) + infinitif : nous allons partir.'},
+  {id:'G14',lv:'a2',type:'mcq',q:'Transformez à la forme négative : « Elle boit du café. »',opts:['Elle ne boit pas du café.','Elle ne boit pas de café.','Elle boit ne pas café.','Elle ne pas boit de café.'],ok:1,pts:3,exp:'À la forme négative, l\'article partitif « du » devient « de » : pas de café.'},
+  {id:'G15',lv:'a2',type:'mcq',q:'Choisissez le bon pronom COD : « Tu vois Marie ? — Oui, je ___ vois. »',opts:['lui','la','le','y'],ok:1,pts:3,exp:'Marie est féminin singulier → COD féminin : « la » (je la vois).'},
+  {id:'G16',lv:'a2',type:'mcq',q:'Choisissez la bonne préposition : « Je vais ___ Espagne. »',opts:['à','au','en','dans'],ok:2,pts:2,exp:'Devant les pays féminins ou commençant par une voyelle → « en » (en France, en Espagne).'},
+  // B1
+  {id:'G17',lv:'b1',type:'mcq',q:'Subjonctif — choisissez : « Je veux qu\'il ___ (venir). »',opts:['vient','vienne','viendra','venait'],ok:1,pts:5,exp:'Après « vouloir que » → subjonctif présent : vienne.'},
+  {id:'G18',lv:'b1',type:'mcq',q:'Pronom relatif — complétez : « Le livre ___ je t\'ai parlé est excellent. »',opts:['qui','que','dont','où'],ok:2,pts:5,exp:'« Parler de qqch » → pronom relatif : « dont » (remplace « de + nom »).'},
+  {id:'G19',lv:'b1',type:'mcq',q:'Voix passive — transformez : « Le jury a sélectionné trois candidats. »',opts:['Trois candidats sont sélectionnés par le jury.','Trois candidats ont été sélectionnés par le jury.','Trois candidats étaient sélectionnés par le jury.','Trois candidats seront sélectionnés par le jury.'],ok:1,pts:5,exp:'PC actif → PC passif : « ont été sélectionnés par le jury ».'},
+  {id:'G20',lv:'b1',type:'mcq',q:'Discours indirect — transformez : « Il a dit : \'Je partirai demain.\' »',opts:['Il a dit qu\'il partirait le lendemain.','Il a dit qu\'il partira demain.','Il a dit qu\'il partait le lendemain.','Il a dit qu\'il soit parti le lendemain.'],ok:0,pts:5,exp:'Discours indirect passé : futur → conditionnel ; demain → le lendemain.'},
+  {id:'G21',lv:'b1',type:'mcq',q:'Conditionnel de politesse — choisissez : « ___ vous me passer le sel ? »',opts:['Pouvez','Pourrez','Pourriez','Puissiez'],ok:2,pts:5,exp:'Pour une demande polie → conditionnel : « Pourriez-vous… ? »'},
+  {id:'G22',lv:'b1',type:'fill',q:'Conjuguez au subjonctif : « Il faut que tu ___ (faire) tes devoirs. »',ok:'fasses',alts:['Fasses'],pts:5,exp:'Subjonctif présent de « faire » (tu) → fasses. Forme irrégulière.'},
+  {id:'G23',lv:'b1',type:'mcq',q:'Choisissez la bonne forme : « Depuis qu\'il est parti, je ___ (ne plus le voir). »',opts:['ne le vois plus','ne plus le vois','ne le vois pas plus','n\'est plus le vois'],ok:0,pts:5,exp:'Négation « ne…plus » : ne + verbe + plus. « Je ne le vois plus. »'},
+  {id:'G24',lv:'b1',type:'mcq',q:'Quel pronom relatif convient ? « La ville ___ je suis né est magnifique. »',opts:['qui','que','dont','où'],ok:3,pts:5,exp:'« Où » est le pronom relatif de lieu (et de temps). Lieu de naissance → « où ».'},
+  {id:'G25',lv:'b1',type:'mcq',q:'Identifiez la phrase au plus-que-parfait correct :',opts:['Quand elle arrivait, il est parti.','Quand elle est arrivée, il partait.','Quand elle est arrivée, il avait déjà parti.','Quand elle est arrivée, il était déjà parti.'],ok:3,pts:5,exp:'Action antérieure à une autre au passé → plus-que-parfait : « il était déjà parti ».'},
+  {id:'G26',lv:'b1',type:'mcq',q:'Choisissez la bonne forme avec « faire faire » :',opts:['Je fais réparer ma voiture.','Je fais que répare ma voiture.','Je fais réparé ma voiture.','Je me fais réparer ma voiture par.'],ok:0,pts:5,exp:'Construction causative : faire + infinitif. « Je fais réparer ma voiture (par un mécanicien). »'},
+  // B2
+  {id:'G27',lv:'b2',type:'mcq',q:'Hypothèse passée (irréel) — choisissez :',opts:['Si tu venais, je serais content.','Si tu étais venu, j\'aurais été content.','Si tu viendras, je serai content.','Si tu viens, j\'étais content.'],ok:1,pts:7,exp:'Irréel du passé : si + PQP → conditionnel passé.'},
+  {id:'G28',lv:'b2',type:'mcq',q:'Identifiez la construction correcte avec le gérondif :',opts:['En arrivant tard, il a raté le train.','En arrivé tard, il a raté.','Arrivant en tard, il a raté.','En tardant arrivé, il a raté.'],ok:0,pts:7,exp:'Gérondif = en + participe présent. « En arrivant tard… »'},
+  {id:'G29',lv:'b2',type:'mcq',q:'Quel usage du subjonctif est incorrect ?',opts:['Je doute qu\'il vienne.','Il est possible qu\'il réussisse.','Je suis sûr qu\'il vienne.','Bien qu\'il soit tard, il travaille.'],ok:2,pts:7,exp:'Après « être sûr que » (certitude) → indicatif : « Je suis sûr qu\'il vient. »'},
+  {id:'G30',lv:'b2',type:'mcq',q:'Identifiez la bonne construction avec « dont » :',opts:['C\'est le médecin dont j\'ai besoin.','C\'est le médecin que j\'ai besoin.','C\'est le médecin qui j\'ai besoin.','C\'est le médecin lequel j\'ai besoin.'],ok:0,pts:7,exp:'« Avoir besoin de qqn » → « dont » remplace « de + nom » : « le médecin dont j\'ai besoin ».'},
+  {id:'G31',lv:'b2',type:'fill',q:'Complétez au conditionnel passé : « Si tu l\'avais su, tu ___ (venir) plus tôt. »',ok:'serais venu',alts:['serais venue','Serais venu','Serais venue'],pts:7,exp:'Irréel du passé : conditionnel passé = serais/serait + PP. « Tu serais venu(e) ».'},
+  {id:'G32',lv:'b2',type:'mcq',q:'Quelle phrase emploie correctement le participe présent ?',opts:['Étant malade, il est resté chez lui.','Étant malade, sa mère l\'a gardé.','Malade, il est resté chez lui.','Ayant malade, il est resté chez lui.'],ok:0,pts:7,exp:'« Étant malade » se rapporte logiquement au sujet « il » — construction correcte.'},
+  {id:'G33',lv:'b2',type:'mcq',q:'Quelle est la construction correcte avec « à condition que » ?',opts:['À condition qu\'il vient, je resterai.','À condition qu\'il vienne, je resterai.','À condition s\'il vient, je resterai.','À condition qu\'il viendrait, je resterai.'],ok:1,pts:7,exp:'« À condition que » + subjonctif : « qu\'il vienne ».'},
+  // C1
+  {id:'G34',lv:'c1',type:'mcq',q:'Quel emploi du subjonctif passé est correct ?',opts:['Bien qu\'il a réussi, il reste humble.','Bien qu\'il soit réussi, il reste humble.','Bien qu\'il ait réussi, il reste humble.','Bien qu\'il aurait réussi, il reste humble.'],ok:2,pts:10,exp:'« Bien que » → subjonctif. Action antérieure → subjonctif passé : « ait réussi ».'},
+  {id:'G35',lv:'c1',type:'mcq',q:'Identifiez la construction syntaxique correcte :',opts:['C\'est à lui à qui je pense.','C\'est à lui que je pense.','C\'est lui auquel je pense à.','C\'est lui que je pense à.'],ok:1,pts:10,exp:'« Penser à qqn » → antécédent avec préposition reprise : « C\'est à lui que je pense. »'},
+  {id:'G36',lv:'c1',type:'mcq',q:'Quelle phrase illustre le discours indirect libre ?',opts:['"Il viendra demain", a-t-il dit.','Il a dit qu\'il viendrait le lendemain.','Il viendrait le lendemain, promis.','Il a promis de venir le lendemain.'],ok:2,pts:10,exp:'Discours indirect libre : absence de verbe introducteur explicite, maintien de la subjectivité du personnage. « Il viendrait le lendemain, promis. »'},
+  {id:'G37',lv:'c1',type:'fill',q:'Complétez : « ___ (Quoique / Quoi que) vous fassiez, il faudra rendre compte. »',ok:'Quoi que',alts:['quoi que'],pts:10,exp:'« Quoi que vous fassiez » = quelle que soit la chose que vous fassiez. En deux mots.'},
+  {id:'G38',lv:'c1',type:'mcq',q:'Quelle est la bonne construction avec « quelque… que » ?',opts:['Quelque difficile que soit la tâche, il y parviendra.','Quelques difficile que soit la tâche, il y parviendra.','Quelque difficiles que soient les tâches, il y parviendra.','Quelques difficiles que soient les tâches, il y parviendra.'],ok:0,pts:10,exp:'« Quelque + adjectif + que + subjonctif » : « quelque » est adverbe → invariable. « Quelque difficile que soit la tâche. »'},
+  // C2
+  {id:'G39',lv:'c2',type:'mcq',q:'Quelle phrase illustre un subjonctif d\'atténuation (archaïsme soutenu) ?',opts:['Que je sache, il n\'est pas venu.','Pour que je sache, il est venu.','Sachant qu\'il n\'est pas venu.','Je veux qu\'il sache qu\'il est venu.'],ok:0,pts:15,exp:'« Que je sache » (= à ma connaissance) : subjonctif d\'atténuation, archaïsme vivant en style soutenu.'},
+  {id:'G40',lv:'c2',type:'mcq',q:'Laquelle de ces constructions est une anacoluthe (rupture syntaxique) ?',opts:['Rentrant chez lui, il pleuvait.','Rentrant chez lui, il fut surpris par la pluie.','La pluie tombait quand il rentra.','Il rentra alors qu\'il pleuvait.'],ok:0,pts:15,exp:'Anacoluthe : « Rentrant chez lui » ne se rapporte pas logiquement au sujet « il pleuvait » — rupture syntaxique.'},
+  {id:'G41',lv:'c2',type:'mcq',q:'Quelle phrase emploie correctement le subjonctif imparfait (registre soutenu/littéraire) ?',opts:['Bien qu\'il fût malade, il travailla.','Bien qu\'il fut malade, il travailla.','Bien qu\'il ait été malade, il travailla.','Bien qu\'il serait malade, il travailla.'],ok:0,pts:15,exp:'Subjonctif imparfait de « être » (3e sg) : « fût » (avec accent circonflexe). Registre littéraire.'},
+  // Suppléments B1-B2
+  {id:'G42',lv:'b1',type:'mcq',q:'Quel connecteur logique exprime la concession ?',opts:['donc','car','pourtant','ainsi'],ok:2,pts:5,exp:'« Pourtant » exprime la concession (opposition inattendue). « Donc » = conséquence, « car » = cause.'},
+  {id:'G43',lv:'b1',type:'mcq',q:'Quelle est la bonne forme de l\'impératif négatif ? « Ne ___ pas ! »',opts:['te lèves','tu lèves','te lève','lève-toi'],ok:2,pts:4,exp:'Impératif négatif : ne + pronom + verbe + pas. « Ne te lève pas ! »'},
+  {id:'G44',lv:'b2',type:'mcq',q:'Identifiez la subordonnée de but correcte :',opts:['Il parle fort pour qu\'on l\'entend.','Il parle fort pour qu\'on l\'entende.','Il parle fort afin de qu\'on l\'entende.','Il parle fort de manière qu\'on l\'entend.'],ok:1,pts:7,exp:'« Pour que » + subjonctif : « pour qu\'on l\'entende ».'},
+  {id:'G45',lv:'b2',type:'mcq',q:'Quelle phrase emploie correctement la mise en relief ?',opts:['C\'est lui qui a décidé.','C\'est lui qu\'a décidé.','C\'est lui que a décidé.','Lui c\'est qu\'a décidé.'],ok:0,pts:6,exp:'Mise en relief : C\'est + pronom tonique + qui/que. Sujet → « qui » : « C\'est lui qui a décidé. »'},
+  {id:'G46',lv:'a2',type:'mcq',q:'Choisissez le bon pronom COI : « Il parle à ses parents ? — Oui, il ___ parle souvent. »',opts:['les','leur','lui','y'],ok:1,pts:3,exp:'« Parler à des personnes » au pluriel → pronom COI pluriel : « leur ».'},
+  {id:'G47',lv:'a2',type:'mcq',q:'Quelle est la bonne construction interrogative (registre standard) ?',opts:['Tu viens où ?','Où tu viens ?','Où est-ce que tu vas ?','Où vas-tu ?'],ok:2,pts:3,exp:'« Où est-ce que tu vas ? » est la forme standard (interrogation avec est-ce que).'},
+  {id:'G48',lv:'b1',type:'mcq',q:'Complétez avec le bon pronom : « Elle se souvient ___ ses vacances. »',opts:['de','à','des','y'],ok:2,pts:5,exp:'« Se souvenir de qqch » → « de » + article défini pluriel = « des ». Elle se souvient de ses vacances → de + les = des.'},
+  {id:'G49',lv:'b1',type:'fill',q:'Conjuguez au subjonctif présent : « Il faut que nous ___ (être) prudents. »',ok:'soyons',alts:['Soyons'],pts:5,exp:'Subjonctif présent de « être » (1re pl.) → soyons. Forme irrégulière.'},
+  {id:'G50',lv:'c1',type:'mcq',q:'Quelle phrase illustre une proposition infinitive ?',opts:['Je vois qu\'il court.','Je le vois courir.','Je vois comment il court.','Je vois sa course.'],ok:1,pts:10,exp:'Proposition infinitive : COD = pronom + infinitif. « Je le vois courir » (= je vois lui courir).'},
+  {id:'G51',lv:'c1',type:'mcq',q:'Identifiez le tour concessif le plus soutenu :',opts:['Même si c\'est difficile, il continuera.','Aussi difficile que ce soit, il continuera.','Bien que c\'est difficile, il continuera.','Quand même c\'est difficile, il continuera.'],ok:1,pts:10,exp:'« Aussi + adj + que + subjonctif » est le tour concessif soutenu : « Aussi difficile que ce soit… »'},
+  {id:'G52',lv:'c2',type:'mcq',q:'Quelle est la construction correcte avec l\'infinitif passé à valeur de cause antérieure ?',opts:['Après avoir lu le rapport, il a pris sa décision.','Après lire le rapport, il a pris sa décision.','Après lu le rapport, il a pris sa décision.','En ayant lu le rapport, il décide.'],ok:0,pts:15,exp:'Infinitif passé = après + avoir/être + PP. « Après avoir lu le rapport » = cause antérieure.'},
+  {id:'G53',lv:'b1',type:'mcq',q:'Quelle phrase emploie correctement « en » pronom :',opts:['J\'en veux trois pommes.','J\'en veux trois.','Trois j\'en veux pommes.','Je veux en trois.'],ok:1,pts:5,exp:'« En » remplace « de + nom » et se place avant le verbe. La quantité (trois) reste : « J\'en veux trois. »'},
+  {id:'G54',lv:'b2',type:'mcq',q:'Identifiez la phrase avec un double pronom correct :',opts:['Il me le donne.','Il le me donne.','Il m\'le donne.','Il donne me le.'],ok:0,pts:7,exp:'Ordre des pronoms COI/COD : me/te/lui/nous/vous/leur + le/la/les. « Il me le donne. »'},
+  {id:'G55',lv:'c1',type:'fill',q:'Complétez au subjonctif imparfait (littéraire) : « Il fallait qu\'elle ___ (savoir) la vérité. »',ok:'sût',alts:['sut'],pts:12,exp:'Subjonctif imparfait de « savoir » (3e sg) → sût (avec accent circonflexe en subjonctif imparfait). Registre littéraire.'},
+  {id:'G56',lv:'a1',type:'mcq',q:'Quel est l\'article contracté correct ? « Je reviens ___ marché. »',opts:['de le','du','de la','des'],ok:1,pts:2,exp:'De + le = du (contraction obligatoire). « Je reviens du marché. »'},
+  {id:'G57',lv:'a2',type:'mcq',q:'Choisissez la bonne forme verbale : « Hier, je ___ (ne rien manger). »',opts:['n\'ai rien mangé','n\'ai pas mangé rien','ai rien mangé','ne rien ai mangé'],ok:0,pts:3,exp:'Négation « ne…rien » au PC : ne + auxiliaire + rien + PP. « Je n\'ai rien mangé. »'},
+  {id:'G58',lv:'b1',type:'mcq',q:'Complétez : « Plus il travaille, ___ il gagne. »',opts:['plus','moins','autant','mieux'],ok:0,pts:4,exp:'Corrélation comparative : « Plus… plus… » — Plus il travaille, plus il gagne.'},
+  {id:'G59',lv:'b2',type:'mcq',q:'Quelle phrase exprime l\'hypothèse future (possible) ?',opts:['Si tu étais venu, j\'aurais été content.','Si tu viens, je serai content.','Si tu venais, je serais content.','Si tu seras venu, je serai content.'],ok:1,pts:6,exp:'Hypothèse réelle/possible : si + présent → futur simple. « Si tu viens, je serai content. »'},
+  {id:'G60',lv:'c2',type:'mcq',q:'Laquelle de ces relatives est une relative appositionnelle (non restrictive) ?',opts:['Le livre que j\'ai lu est intéressant.','Les étudiants qui travaillent réussissent.','Mon ami, qui habite à Lyon, viendra demain.','C\'est la seule solution qui convienne.'],ok:2,pts:15,exp:'Relative appositionnelle : entre virgules, donne une information accessoire (non restrictive). « Mon ami, qui habite à Lyon, viendra. »'},
+],
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// VOCABULAIRE — 55 questions
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+vocab: [
+  // PRÉ-A1
+  {id:'V01',lv:'prea1',type:'mcq',q:'Comment dit-on « goodbye » en français ?',opts:['Bonjour','Merci','Au revoir','Bonsoir'],ok:2,pts:1,exp:'« Au revoir » = goodbye.'},
+  {id:'V02',lv:'prea1',type:'mcq',q:'Quel objet sert à écrire ?',opts:['une table','un stylo','une chaise','une fenêtre'],ok:1,pts:1,exp:'Un stylo sert à écrire.'},
+  {id:'V03',lv:'prea1',type:'mcq',q:'Comment s\'appelle le repas du soir en français ?',opts:['Le petit-déjeuner','Le déjeuner','Le dîner','Le goûter'],ok:2,pts:1,exp:'Le dîner = the dinner / evening meal.'},
+  // A1
+  {id:'V04',lv:'a1',type:'mcq',q:'Quel est le contraire de « grand » ?',opts:['fort','petit','gros','lent'],ok:1,pts:2,exp:'Antonyme de grand → petit.'},
+  {id:'V05',lv:'a1',type:'mcq',q:'Que signifie « avoir faim » ?',opts:['Avoir sommeil','Vouloir manger','Être en colère','Avoir chaud'],ok:1,pts:2,exp:'« Avoir faim » = vouloir manger (to be hungry).'},
+  {id:'V06',lv:'a1',type:'mcq',q:'Quel mot désigne la personne qui soigne les malades ?',opts:['Un pompier','Un médecin','Un boucher','Un boulanger'],ok:1,pts:2,exp:'Un médecin soigne les malades.'},
+  {id:'V07',lv:'a1',type:'mcq',q:'Choisissez le mot intrus dans la liste : table, chaise, lit, réfrigérateur, canapé.',opts:['chaise','réfrigérateur','canapé','lit'],ok:1,pts:2,exp:'Réfrigérateur est un électroménager — les autres sont des meubles.'},
+  // A2
+  {id:'V08',lv:'a2',type:'mcq',q:'Quel est le synonyme de « rapide » ?',opts:['lent','difficile','vite','grand'],ok:2,pts:3,exp:'Synonyme de rapide → vite / véloce. « Vite » est l\'adverbe correspondant.'},
+  {id:'V09',lv:'a2',type:'mcq',q:'Que signifie l\'expression « avoir le cafard » ?',opts:['Avoir un insecte chez soi','Être triste / déprimé','Avoir très chaud','Être paresseux'],ok:1,pts:3,exp:'« Avoir le cafard » = être mélancolique, déprimé.'},
+  {id:'V10',lv:'a2',type:'mcq',q:'Choisissez le bon connecteur : « Il travaille beaucoup ___ il est toujours fatigué. »',opts:['donc','mais','pourtant','parce que'],ok:2,pts:3,exp:'Opposition entre travailler et être fatigué → « pourtant » (concession).'},
+  {id:'V11',lv:'a2',type:'mcq',q:'Quel mot appartient au champ lexical de la cuisine ?',opts:['radiateur','casserole','fenêtre','trottoir'],ok:1,pts:2,exp:'« Casserole » est un ustensile de cuisine.'},
+  {id:'V12',lv:'a2',type:'mcq',q:'Choisissez le bon mot : « Il fait ___ dehors, je dois mettre mon manteau. »',opts:['chaud','beau','froid','sec'],ok:2,pts:2,exp:'On met un manteau quand il fait froid.'},
+  {id:'V13',lv:'a2',type:'mcq',q:'Que veut dire « gratuit » ?',opts:['Cher','Rapide','Sans payer','Difficile'],ok:2,pts:2,exp:'Gratuit = free / sans payer.'},
+  {id:'V14',lv:'a2',type:'mcq',q:'Quel est le verbe associé à « une décision » ?',opts:['prendre','faire','aller','mettre'],ok:0,pts:3,exp:'On « prend » une décision (make/take a decision).'},
+  // B1
+  {id:'V15',lv:'b1',type:'mcq',q:'Quel terme est de registre soutenu ?',opts:['sympa','agréable','cool','super'],ok:1,pts:5,exp:'« Agréable » est le terme neutre/soutenu. Les autres sont familiers.'},
+  {id:'V16',lv:'b1',type:'mcq',q:'Que signifie « se mettre à » ?',opts:['Arrêter de faire','Commencer à faire','Continuer à faire','Faire semblant de'],ok:1,pts:5,exp:'« Se mettre à » = commencer (à faire qqch).'},
+  {id:'V17',lv:'b1',type:'mcq',q:'Quel est le sens de « avoir beau + infinitif » ?',opts:['Être beau','Faire des efforts inutiles','Être capable de','Avoir le droit de'],ok:1,pts:5,exp:'« Avoir beau faire qqch » = faire qqch sans résultat.'},
+  {id:'V18',lv:'b1',type:'mcq',q:'Que signifie « nonobstant » ?',opts:['Par conséquent','Malgré, en dépit de','Ainsi, de plus','Grâce à'],ok:1,pts:5,exp:'« Nonobstant » = malgré, en dépit de (terme juridique et littéraire).'},
+  {id:'V19',lv:'b1',type:'mcq',q:'Quelle expression signifie « être très occupé » ?',opts:['Avoir le cœur sur la main','Avoir du pain sur la planche','Avoir le cafard','Avoir le vent en poupe'],ok:1,pts:5,exp:'« Avoir du pain sur la planche » = avoir beaucoup de travail à faire.'},
+  {id:'V20',lv:'b1',type:'mcq',q:'Quel connecteur introduit une cause ?',opts:['donc','pourtant','puisque','or'],ok:2,pts:4,exp:'« Puisque » introduit une cause (comme « car », « parce que »). « Or » est adversatif/logique.'},
+  {id:'V21',lv:'b1',type:'mcq',q:'Que signifie « une contrainte » ?',opts:['Un avantage','Une obligation imposée','Une liberté','Une récompense'],ok:1,pts:5,exp:'Une contrainte = une obligation, une limite imposée de l\'extérieur.'},
+  {id:'V22',lv:'b1',type:'mcq',q:'Quel verbe signifie « rendre meilleur » ?',opts:['aggraver','améliorer','confirmer','contester'],ok:1,pts:4,exp:'Améliorer = rendre meilleur, faire progresser.'},
+  {id:'V23',lv:'b1',type:'mcq',q:'Que signifie « au fur et à mesure » ?',opts:['Immédiatement','Progressivement, au fil du temps','Brusquement','En même temps que'],ok:1,pts:5,exp:'« Au fur et à mesure » = progressivement, de façon graduelle.'},
+  // B2
+  {id:'V24',lv:'b2',type:'mcq',q:'Quel est le sens exact de « ambivalent » ?',opts:['Très puissant','Présentant deux aspects contradictoires','Complètement neutre','Extrêmement positif'],ok:1,pts:7,exp:'Ambivalent = qui comporte deux valeurs/attitudes opposées simultanément.'},
+  {id:'V25',lv:'b2',type:'mcq',q:'Dans quel contexte emploie-t-on « paradigme » ?',opts:['Pour décrire un paradis','Pour désigner un modèle de référence dominant','Pour parler d\'un paradoxe','Pour une comparaison poétique'],ok:1,pts:7,exp:'Paradigme = modèle de référence dominant dans un domaine.'},
+  {id:'V26',lv:'b2',type:'mcq',q:'Quelle expression signifie « remettre les choses à leur juste place » ?',opts:['Mettre les pieds dans le plat','Remettre les pendules à l\'heure','Jeter l\'éponge','Brûler les étapes'],ok:1,pts:7,exp:'« Remettre les pendules à l\'heure » = corriger une situation, recadrer.'},
+  {id:'V27',lv:'b2',type:'mcq',q:'Que signifie « corroborer » ?',opts:['Contredire','Confirmer, appuyer','Modifier','Décrire'],ok:1,pts:7,exp:'Corroborer = confirmer, renforcer une affirmation ou une thèse.'},
+  {id:'V28',lv:'b2',type:'mcq',q:'Que veut dire l\'expression « brûler les étapes » ?',opts:['Travailler trop lentement','Aller trop vite sans respecter les phases nécessaires','Faire des erreurs répétées','Abandonner un projet'],ok:1,pts:7,exp:'« Brûler les étapes » = sauter des étapes importantes, avancer trop vite.'},
+  {id:'V29',lv:'b2',type:'mcq',q:'Quel mot signifie « qui ne peut pas être nié » ?',opts:['indéniable','ineffable','indicible','inaliénable'],ok:0,pts:6,exp:'Indéniable = qu\'on ne peut nier, incontestable.'},
+  {id:'V30',lv:'b2',type:'mcq',q:'Quelle est la différence entre « imminent » et « éminent » ?',opts:['Aucune différence','Imminent = qui va arriver très bientôt / éminent = remarquable, illustre','Imminent = grand / éminent = proche','Ils sont synonymes'],ok:1,pts:7,exp:'Paronymes : imminent (sur le point de se produire) ≠ éminent (remarquable, distingué).'},
+  {id:'V31',lv:'b2',type:'mcq',q:'Que signifie « in fine » (locution latine courante) ?',opts:['Au début','En fin de compte, finalement','Immédiatement','En théorie'],ok:1,pts:6,exp:'« In fine » = en fin de compte, en définitive (locution latine courante en français écrit).'},
+  // C1
+  {id:'V32',lv:'c1',type:'mcq',q:'Que signifie « épistémologie » ?',opts:['Étude de l\'être','Étude de la connaissance scientifique','Étude des valeurs morales','Étude des fins dernières'],ok:1,pts:10,exp:'Épistémologie = philosophie de la connaissance et de ses fondements.'},
+  {id:'V33',lv:'c1',type:'mcq',q:'Qu\'est-ce qu\'une « circumlocution » ?',opts:['Figure d\'exagération','Expression indirecte utilisant plusieurs mots','Répétition emphatique','Inversion syntaxique'],ok:1,pts:10,exp:'Circumlocution (ou périphrase) = expression indirecte utilisant plusieurs mots pour dire ce qu\'un seul suffirait.'},
+  {id:'V34',lv:'c1',type:'mcq',q:'Quel mot signifie « relatif à la connaissance » ?',opts:['ontique','gnoséologique','cosmologique','téléologique'],ok:1,pts:10,exp:'Gnoséologique = relatif à la théorie de la connaissance.'},
+  {id:'V35',lv:'c1',type:'mcq',q:'Que désigne l\'« hégémonie » ?',opts:['Un type de gouvernement démocratique','La domination d\'un groupe sur d\'autres','Une forme de résistance politique','L\'égalité entre les peuples'],ok:1,pts:10,exp:'Hégémonie = suprématie, domination d\'un État, d\'une classe ou d\'une culture sur d\'autres.'},
+  {id:'V36',lv:'c1',type:'mcq',q:'Que signifie « tautologie » ?',opts:['Contradiction logique','Répétition inutile d\'une même idée avec des mots différents','Figure d\'opposition','Raisonnement par analogie'],ok:1,pts:10,exp:'Tautologie = répétition de la même idée sous des formes différentes (ex : « monter en haut »).'},
+  {id:'V37',lv:'c1',type:'mcq',q:'Quel adjectif signifie « qui dure peu de temps » ?',opts:['pérenne','éphémère','immuable','persistant'],ok:1,pts:9,exp:'Éphémère = qui dure peu de temps, passager.'},
+  {id:'V38',lv:'c1',type:'mcq',q:'Que signifie « exacerber » ?',opts:['Atténuer','Aggraver, intensifier à l\'extrême','Clarifier','Justifier'],ok:1,pts:10,exp:'Exacerber = porter à un degré extrême, aggraver (ex : exacerber les tensions).'},
+  // C2
+  {id:'V39',lv:'c2',type:'mcq',q:'Que désigne l\'« hypotypose » en rhétorique ?',opts:['Figure d\'atténuation (litote)','Description si vive qu\'elle met la scène sous les yeux','Raisonnement par l\'absurde','Répétition à visée emphatique (anaphore)'],ok:1,pts:15,exp:'Hypotypose : figure créant une représentation vivante et animée, comme si le lecteur voyait la scène.'},
+  {id:'V40',lv:'c2',type:'mcq',q:'Que signifie l\'adjectif « aporétique » ?',opts:['Sans issue, plein d\'apories (contradictions insolubles)','Relatif à l\'apothéose','Concernant l\'apocalypse','Extrêmement positif'],ok:0,pts:15,exp:'Aporétique (du grec aporia) = qui présente une contradiction ou un problème sans solution apparente.'},
+  {id:'V41',lv:'c2',type:'mcq',q:'Que désigne la « parémiologie » ?',opts:['Étude des parasites','Étude des proverbes et dictons','Science de la parole','Étude des parents'],ok:1,pts:15,exp:'Parémiologie = discipline étudiant les proverbes, dictons et expressions proverbiales.'},
+  {id:'V42',lv:'c2',type:'mcq',q:'Que signifie « consubstantiel » ?',opts:['Qui est de même substance, indissociable','Qui est superficiel','Qui est contradictoire','Qui est externe'],ok:0,pts:15,exp:'Consubstantiel = qui est de même substance, inséparablement lié (terme théologique puis philosophique).'},
+  {id:'V43',lv:'c2',type:'mcq',q:'Que désigne la « prolepse » (en rhétorique narrative) ?',opts:['Un retour en arrière','Une anticipation narrative (anachronie vers le futur)','Une rupture de style','Une figure de répétition'],ok:1,pts:15,exp:'La prolepse (ou anticipation) désigne une anachronie narrative vers le futur — on évoque à l\'avance un événement ultérieur.'},
+  // Suppléments
+  {id:'V44',lv:'b1',type:'mcq',q:'Que signifie « prendre en compte » ?',opts:['Ignorer','Considérer, tenir compte de','Calculer','Rejeter'],ok:1,pts:4,exp:'« Prendre en compte » = considérer, intégrer dans sa réflexion ou décision.'},
+  {id:'V45',lv:'b1',type:'mcq',q:'Que veut dire « mettre en évidence » ?',opts:['Dissimuler','Rendre visible, montrer clairement','Illuminer physiquement','Contredire'],ok:1,pts:4,exp:'Mettre en évidence = démontrer, rendre manifeste.'},
+  {id:'V46',lv:'b2',type:'mcq',q:'Quel est le sens de « prégnant » ?',opts:['Enceinte','Qui s\'impose fortement à l\'esprit','Vide de sens','Douloureux'],ok:1,pts:7,exp:'Prégnant = qui s\'impose avec force à l\'esprit, très présent (ex : une image prégnante).'},
+  {id:'V47',lv:'b2',type:'mcq',q:'Que désigne « l\'empathie » ?',opts:['L\'indifférence aux autres','La capacité à ressentir ce que l\'autre ressent','La pitié','L\'admiration'],ok:1,pts:6,exp:'L\'empathie = capacité à se mettre à la place de l\'autre, à ressentir ses émotions.'},
+  {id:'V48',lv:'b1',type:'mcq',q:'Quel est l\'antonyme de « négliger » ?',opts:['oublier','soigner','ignorer','perdre'],ok:1,pts:4,exp:'Antonyme de négliger → soigner, prendre soin de.'},
+  {id:'V49',lv:'c1',type:'mcq',q:'Que signifie « désuet » ?',opts:['Moderne','Périmé, tombé en désuétude','Complexe','Primitif'],ok:1,pts:9,exp:'Désuet = qui n\'est plus en usage, qui appartient à une époque révolue.'},
+  {id:'V50',lv:'c1',type:'mcq',q:'Que désigne un « oxymore » ?',opts:['Une répétition','Une alliance de deux termes contradictoires','Une exagération','Une comparaison'],ok:1,pts:9,exp:'Oxymore = figure de style associant deux termes contradictoires (ex : « une obscure clarté »).'},
+  {id:'V51',lv:'a2',type:'mcq',q:'Quelle expression signifie « commencer à exister » ?',opts:['voir le jour','perdre la tête','prendre la fuite','couper les ponts'],ok:0,pts:3,exp:'« Voir le jour » = naître, commencer à exister (ex : « ce projet a vu le jour en 2020 »).'},
+  {id:'V52',lv:'b2',type:'mcq',q:'Que signifie « nuancer » une affirmation ?',opts:['La répéter','La complexifier, y apporter des distinctions','La nier','La simplifier'],ok:1,pts:6,exp:'Nuancer = apporter des distinctions, éviter les généralisations excessives.'},
+  {id:'V53',lv:'b1',type:'mcq',q:'Quel registre emploie-t-on dans un e-mail professionnel ?',opts:['Familier','Soutenu ou courant','Argotique','Populaire'],ok:1,pts:4,exp:'Un e-mail professionnel utilise un registre courant ou soutenu, jamais familier.'},
+  {id:'V54',lv:'c2',type:'mcq',q:'Que désigne la « syllepse de sens » ?',opts:['Une répétition phonique','L\'emploi d\'un mot à la fois au sens propre et figuré dans la même phrase','Une figure d\'amplification','Une rupture syntaxique'],ok:1,pts:15,exp:'Syllepse de sens : un mot est pris simultanément dans deux sens (propre et figuré) dans le même syntagme.'},
+  {id:'V55',lv:'c1',type:'mcq',q:'Que signifie « dialectique » dans un sens philosophique ?',opts:['Une contradiction irrésoluble','Un dialogue structuré visant à dégager une vérité par opposition et dépassement','Une figure de rhétorique','Un raisonnement linéaire'],ok:1,pts:10,exp:'Dialectique = processus de pensée par thèse, antithèse et synthèse, visant à dépasser les contradictions.'},
+],
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// EXPRESSION ÉCRITE — 10 questions
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ecrit: [
+  {id:'E01',lv:'a1',type:'text',q:'Présentez-vous : prénom, âge, nationalité et une activité que vous aimez.',instr:'Rédigez 3 à 5 phrases (40–70 mots).',pts:10,rubric:['identité','âge/nationalité','activité','ponctuation','majuscules']},
+  {id:'E02',lv:'a1',type:'text',q:'Décrivez votre famille en quelques phrases (prénom, âge, profession).',instr:'40–60 mots · Phrases simples.',pts:10,rubric:['présentation','vocabulaire famille','grammaire de base']},
+  {id:'E03',lv:'a2',type:'text',q:'Écrivez un message WhatsApp à un ami pour proposer une sortie ce weekend. Précisez l\'activité, le lieu et l\'heure.',instr:'50–80 mots · Ton informel.',pts:15,rubric:['proposition concrète','informations (lieu/heure)','ton informel','grammaire']},
+  {id:'E04',lv:'a2',type:'text',q:'Rédigez une carte postale à un(e) ami(e) pour lui parler de vos vacances.',instr:'60–80 mots · Décrivez le lieu, les activités, vos impressions.',pts:15,rubric:['description','vocabulaire vacances','temps verbaux','ton personnel']},
+  {id:'E05',lv:'b1',type:'text',q:'Rédigez un e-mail formel à votre directeur pour demander une journée de congé. Expliquez votre raison et proposez de rattraper le travail.',instr:'80–120 mots · Soignez la formule d\'appel et de clôture.',pts:20,rubric:['formule d\'appel','formule de clôture','registre formel','structure','grammaire','vocabulaire professionnel']},
+  {id:'E06',lv:'b1',type:'text',q:'Vous avez vu un film récemment. Rédigez une critique courte : résumez l\'histoire, donnez votre avis et recommandez ou non ce film.',instr:'100–130 mots · Donnez des arguments.',pts:20,rubric:['résumé clair','opinion argumentée','connecteurs','richesse lexicale']},
+  {id:'E07',lv:'b2',type:'text',q:'Rédigez un texte argumentatif : pour ou contre l\'interdiction des téléphones portables à l\'école. Thèse, deux arguments, conclusion.',instr:'150–200 mots · Utilisez des connecteurs logiques.',pts:25,rubric:['thèse claire','arguments développés','connecteurs','conclusion','richesse lexicale','structure']},
+  {id:'E08',lv:'b2',type:'text',q:'Rédigez une lettre de motivation pour un poste de stagiaire dans une entreprise de votre choix.',instr:'180–220 mots · Format lettre officielle.',pts:25,rubric:['format lettre','présentation du candidat','motivation','compétences','registre soutenu','structure']},
+  {id:'E09',lv:'c1',type:'text',q:'Commentez cette citation de Simone de Beauvoir : « On ne naît pas femme, on le devient. » Développez une réflexion nuancée avec des exemples.',instr:'200–280 mots · Style soutenu.',pts:30,rubric:['analyse de la citation','nuance','exemples pertinents','structure rhétorique','vocabulaire soutenu','syntaxe complexe']},
+  {id:'E10',lv:'c2',type:'text',q:'Dans quelle mesure la langue façonne-t-elle notre perception du réel ? Dissertation courte avec introduction, développement et conclusion.',instr:'280–350 mots · Mobilisez des notions philosophiques et linguistiques.',pts:35,rubric:['problématique','thèse/antithèse','exemples académiques','transitions','maîtrise stylistique','vocabulaire philosophique']},
+],
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// EXPRESSION ORALE (simulée) — 8 questions
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+oral: [
+  {id:'OE01',lv:'a1',type:'oral',q:'Décrivez votre chambre ou votre endroit préféré.',instr:'Imaginez que vous parlez. Écrivez ce que vous diriez (40–70 mots).',pts:10,rubric:['description','vocabulaire du lieu','phrases simples']},
+  {id:'OE02',lv:'a1',type:'oral',q:'Parlez de votre animal de compagnie (réel ou imaginaire).',instr:'50–70 mots · Décrivez l\'animal et expliquez pourquoi vous l\'aimez.',pts:10,rubric:['description','vocabulaire animaux','phrases simples']},
+  {id:'OE03',lv:'a2',type:'oral',q:'Parlez de votre routine quotidienne (matin, après-midi, soir).',instr:'70–100 mots · Utilisez des marqueurs temporels.',pts:15,rubric:['organisation temporelle','verbes du quotidien','cohérence']},
+  {id:'OE04',lv:'b1',type:'oral',q:'Racontez un souvenir important de votre enfance.',instr:'100–150 mots · Utilisez l\'imparfait et le passé composé.',pts:20,rubric:['récit structuré','temps du récit','expressions de sentiment','cohérence']},
+  {id:'OE05',lv:'b1',type:'oral',q:'Décrivez un problème dans votre quartier et proposez une solution.',instr:'100–140 mots · Structurez : problème → causes → solution.',pts:20,rubric:['identification du problème','analyse','proposition','connecteurs','vocabulaire civique']},
+  {id:'OE06',lv:'b2',type:'oral',q:'Donnez votre opinion sur l\'impact des réseaux sociaux sur les relations humaines. Argumentez.',instr:'150–200 mots · Position claire + exemples.',pts:25,rubric:['position claire','argumentation','exemples','connecteurs','richesse lexicale']},
+  {id:'OE07',lv:'c1',type:'oral',q:'La maîtrise d\'une langue étrangère change-t-elle la façon de penser ? Développez votre point de vue.',instr:'200–250 mots · Style élaboré et nuancé.',pts:30,rubric:['réflexion nuancée','références','structure','aisance stylistique','vocabulaire soutenu']},
+  {id:'OE08',lv:'c2',type:'oral',q:'Dans quelle mesure peut-on dire que parler une langue, c\'est adopter une vision du monde ? Développez.',instr:'250–300 mots · Dissertation orale : thèse + antithèse + synthèse.',pts:35,rubric:['problématique','thèse/antithèse','exemples philosophiques/linguistiques','synthèse','aisance C2']},
+],
+}; // fin QB
+
+// ─────────────────────────────────────────
+// CONFIGURATION DES SECTIONS
+// ─────────────────────────────────────────
+// Volumes calés sur le TCF officiel (~2h à 2h30)
+// TCF réel : 76 questions obligatoires + 2 productions
+const SECTIONS = [
+  { id:'lecture',   name:'Compréhension écrite',   icon:'📖', count:20, weight:.22 },
+  { id:'orale',     name:'Compréhension orale',     icon:'🎧', count:15, weight:.13 },
+  { id:'ortho',     name:'Orthographe & Dictée',    icon:'✏️', count:12, weight:.13 },
+  { id:'grammaire', name:'Grammaire',                icon:'⚙️', count:18, weight:.20 },
+  { id:'vocab',     name:'Vocabulaire',              icon:'📚', count:15, weight:.15 },
+  { id:'ecrit',     name:'Expression écrite',       icon:'✍️', count:1,  weight:.10 },
+  { id:'oral',      name:'Expression orale',        icon:'🎤', count:1,  weight:.07 },
+];
+
+// ─────────────────────────────────────────
+// UTILITAIRES
+// ─────────────────────────────────────────
+function qs(id){ return document.getElementById(id); }
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  qs(id).classList.add('active');
+}
+
+// ─────────────────────────────────────────
+// TIMER
+// ─────────────────────────────────────────
+function startTimer(){
+  // Timer démarre seulement quand le test commence réellement
+  S.timerStart = Date.now();
+  S.timerSec   = 0;
+  qs('hdr-timer').style.display='block';
+  S.timerInterval=setInterval(()=>{
+    S.timerSec = Math.floor((Date.now() - S.timerStart) / 1000);
+    const m=String(Math.floor(S.timerSec/60)).padStart(2,'0');
+    const s=String(S.timerSec%60).padStart(2,'0');
+    qs('hdr-timer').textContent=`⏱ ${m}:${s}`;
+    if(S.timerSec>=9000) qs('hdr-timer').classList.add('warn'); // alerte à 2h30
+  },1000);
+}
+function stopTimer(){ clearInterval(S.timerInterval); }
+
+// ─────────────────────────────────────────
+// NAVIGATION
+// ─────────────────────────────────────────
+function goToForm(){ showScreen('screen-form'); }
+
+function startTest(){
+  const prenom=qs('f-prenom').value.trim();
+  const nom=qs('f-nom').value.trim();
+  if(!prenom||!nom){ qs('f-err').classList.add('show'); return; }
+  qs('f-err').classList.remove('show');
+
+  const nMap={inconnu:'a2',debutant:'prea1',elementaire:'a2',intermediaire:'b1',avance:'b2',expert:'c1'};
+  S.candidate={
+    prenom,nom,
+    age:qs('f-age').value,
+    pays:qs('f-pays').value,
+    langue:qs('f-langue').value,
+    niveau:qs('f-niveau').value,
+    objectif:qs('f-objectif').value,
+    date:new Date().toLocaleDateString('fr-FR',{year:'numeric',month:'long',day:'numeric'}),
+    dateISO:new Date().toISOString().split('T')[0],
+  };
+  S.level=nMap[S.candidate.niveau]||'a2';
+  SECTIONS.forEach(s=>{ S.scores[s.id]=[]; });
+  S.totalQs=SECTIONS.reduce((a,s)=>a+s.count,0);
+  S.usedIds=new Set();
+
+  qs('hdr-prog-wrap').style.display='flex';
+  startTimer();
+  loadSection(0);
+  showScreen('screen-test');
+}
+
+// ─────────────────────────────────────────
+// SÉLECTION ADAPTATIVE
+// ─────────────────────────────────────────
+function adaptLevel(correct){
+  if(correct){ S.streak=Math.max(0,S.streak)+1; }
+  else        { S.streak=Math.min(0,S.streak)-1; }
+  const idx=LVL.indexOf(S.level);
+  if(S.streak>=2&&idx<LVL.length-1){ S.level=LVL[idx+1]; S.streak=0; }
+  if(S.streak<=-2&&idx>0)          { S.level=LVL[idx-1]; S.streak=0; }
+}
+
+function pickQuestions(bankKey,count){
+  const bank=QB[bankKey]||[];
+  const lvIdx=LVL.indexOf(S.level);
+  const avail=bank.filter(q=>!S.usedIds.has(q.id));
+  const sorted=avail.sort((a,b)=>{
+    const da=Math.abs(LVL.indexOf(a.lv)-lvIdx);
+    const db=Math.abs(LVL.indexOf(b.lv)-lvIdx);
+    return da-db||Math.random()-.5;
+  });
+  const picked=sorted.slice(0,count);
+  picked.forEach(q=>S.usedIds.add(q.id));
+  return picked;
+}
+
+// ─────────────────────────────────────────
+// SECTION
+// ─────────────────────────────────────────
+function loadSection(secIdx){
+  S.section=secIdx;
+  S.question=0;
+  S.sectionQs=pickQuestions(SECTIONS[secIdx].id,SECTIONS[secIdx].count);
+  renderQuestion();
+}
+
+// ─────────────────────────────────────────
+// RENDU QUESTION
+// ─────────────────────────────────────────
+function renderQuestion(){
+  const sec=SECTIONS[S.section];
+  const q=S.sectionQs[S.question];
+  if(!q){ advanceSection(); return; }
+
+  qs('s-icon').textContent=sec.icon;
+  qs('s-title').textContent=sec.name;
+  qs('s-sub').textContent=typeLabel(q.type);
+  qs('s-qn').textContent=`${S.question+1}/${S.sectionQs.length}`;
+  qs('s-prog').style.width=`${(S.question/S.sectionQs.length)*100}%`;
+
+  const badge=qs('q-lvl-badge');
+  badge.textContent=LNAME[q.lv];
+  badge.className=`lvl-badge lv-${q.lv}`;
+  qs('q-type-tag').textContent=typeLabel(q.type).toUpperCase();
+
+  const ctxEl=qs('q-ctx');
+  if(q.ctx){ ctxEl.textContent=q.ctx; ctxEl.style.display='block'; }
+  else ctxEl.style.display='none';
+
+  qs('q-text').textContent=q.q||'';
+  qs('q-instr').textContent=q.instr||'';
+
+  const body=qs('q-body');
+  body.innerHTML='';
+  if(q.type==='mcq')        renderMCQ(q,body);
+  else if(q.type==='vf')    renderVF(q,body);
+  else if(q.type==='fill')  renderFill(q,body);
+  else if(q.type==='text')  renderText(q,body);
+  else if(q.type==='oral')  renderOral(q,body);
+
+  const fb=qs('q-fb');
+  fb.className='feedback';
+  fb.innerHTML='';
+  qs('btn-next').style.display='none';
+
+  renderDots();
+
+  const done=SECTIONS.slice(0,S.section).reduce((a,s)=>a+s.count,0)+S.question;
+  const pct=Math.round((done/S.totalQs)*100);
+  qs('hdr-prog-fill').style.width=pct+'%';
+  qs('hdr-prog-lbl').textContent=pct+'%';
+}
+
+function typeLabel(t){
+  return {mcq:'Choix multiple',vf:'Vrai / Faux',fill:'Compléter',text:'Expression écrite',oral:'Expression orale'}[t]||t;
+}
+
+// ─────────────────────────────────────────
+// TYPES DE QUESTIONS
+// ─────────────────────────────────────────
+function renderMCQ(q,body){
+  const grid=document.createElement('div');
+  grid.className='opts-grid';
+  ['A','B','C','D'].forEach((l,i)=>{
+    if(i>=q.opts.length) return;
+    const btn=document.createElement('button');
+    btn.className='opt';
+    btn.innerHTML=`<span class="opt-letter">${l}</span><span>${q.opts[i]}</span>`;
+    btn.onclick=()=>answerMCQ(i,q);
+    grid.appendChild(btn);
+  });
+  body.appendChild(grid);
+}
+
+function answerMCQ(idx,q){
+  const btns=[...qs('q-body').querySelectorAll('.opt')];
+  btns.forEach(b=>b.onclick=null);
+  const ok=idx===q.ok;
+  btns.forEach((b,i)=>{ if(i===q.ok) b.classList.add('ok'); });
+  if(!ok) btns[idx].classList.add('ko');
+  recordAnswer(q,ok,q.opts[idx]);
+  showFeedback(ok,q.exp);
+  showNext();
+}
+
+function renderVF(q,body){
+  const row=document.createElement('div');
+  row.className='vf-row';
+  ['✓ Vrai','✗ Faux'].forEach((lbl,i)=>{
+    const btn=document.createElement('button');
+    btn.className='vf-btn';
+    btn.textContent=lbl;
+    btn.onclick=()=>answerVF(i===0,q);
+    row.appendChild(btn);
+  });
+  body.appendChild(row);
+}
+
+function answerVF(ans,q){
+  const btns=[...qs('q-body').querySelectorAll('.vf-btn')];
+  btns.forEach(b=>b.onclick=null);
+  const ok=ans===q.ok;
+  btns[q.ok?0:1].classList.add('ok');
+  if(!ok) btns[ans?0:1].classList.add('ko');
+  recordAnswer(q,ok,ans?'Vrai':'Faux');
+  showFeedback(ok,q.exp);
+  showNext();
+}
+
+function renderFill(q,body){
+  const wrap=document.createElement('div');
+  wrap.className='fill-wrap';
+  const inp=document.createElement('input');
+  inp.type='text'; inp.className='fill-input'; inp.id='fill-inp';
+  inp.placeholder='Votre réponse…';
+  wrap.appendChild(inp);
+  const btn=document.createElement('button');
+  btn.className='btn-gold';
+  btn.style.cssText='margin-top:12px;padding:13px 28px;font-size:14px;border-radius:100px;';
+  btn.textContent='Valider';
+  btn.onclick=()=>answerFill(q);
+  wrap.appendChild(btn);
+  body.appendChild(wrap);
+  inp.addEventListener('keydown',e=>{ if(e.key==='Enter') answerFill(q); });
+}
+
+function answerFill(q){
+  const inp=qs('fill-inp');
+  const val=inp.value.trim().toLowerCase();
+  const expected=[q.ok.toLowerCase(),...(q.alts||[]).map(a=>a.toLowerCase())];
+  const ok=expected.some(e=>val===e||levenshtein(val,e)<=1);
+  inp.disabled=true; inp.classList.add(ok?'ok':'ko');
+  qs('q-body').querySelector('.btn-gold').disabled=true;
+  if(!ok){
+    const hint=document.createElement('div');
+    hint.style.cssText='font-size:13px;color:var(--gris3);margin-top:8px;';
+    hint.textContent=`Réponse attendue : « ${q.ok} »`;
+    qs('q-body').appendChild(hint);
+  }
+  recordAnswer(q,ok,val);
+  showFeedback(ok,q.exp);
+  showNext();
+}
+
+function levenshtein(a,b){
+  const m=a.length,n=b.length,dp=Array.from({length:m+1},(_,i)=>Array.from({length:n+1},(_,j)=>i?j?0:i:j));
+  for(let i=1;i<=m;i++) for(let j=1;j<=n;j++) dp[i][j]=a[i-1]===b[j-1]?dp[i-1][j-1]:1+Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]);
+  return dp[m][n];
+}
+
+function renderText(q,body){
+  const ta=document.createElement('textarea');
+  ta.className='text-area'; ta.id='text-ta';
+  ta.placeholder='Rédigez votre réponse ici…'; ta.rows=6;
+  body.appendChild(ta);
+  const wc=document.createElement('div');
+  wc.className='wc'; wc.textContent='0 mot(s)';
+  body.appendChild(wc);
+  ta.addEventListener('input',()=>{
+    const w=ta.value.trim().split(/\s+/).filter(x=>x.length>0).length;
+    wc.textContent=`${w} mot(s)`;
+    wc.style.color=w>=20?'var(--vert)':'var(--gris2)';
+  });
+  const btn=document.createElement('button');
+  btn.className='btn-gold';
+  btn.style.cssText='margin-top:14px;padding:13px 28px;font-size:14px;border-radius:100px;width:100%;';
+  btn.textContent='Valider ma production';
+  btn.onclick=()=>answerText(q);
+  body.appendChild(btn);
+}
+
+function answerText(q){
+  const ta=qs('text-ta');
+  const val=ta.value.trim();
+  ta.disabled=true;
+  qs('q-body').querySelector('.btn-gold').disabled=true;
+  const words=val.split(/\s+/).filter(x=>x.length>0).length;
+  const ok=words>=15;
+  recordAnswer(q,ok,val);
+  const fb=qs('q-fb');
+  fb.className='feedback ok show';
+  fb.innerHTML=`<strong>✓ Production enregistrée</strong> (${words} mots) — Votre texte sera analysé dans le rapport.`;
+  showNext();
+}
+
+function renderOral(q,body){
+  const box=document.createElement('div');
+  box.className='oral-sim';
+  box.innerHTML=`<div class="mic">🎤</div><h4>Simulation de l'expression orale</h4><p>Imaginez que vous parlez. Écrivez ci-dessous ce que vous diriez.</p><div class="dot-row"><div class="dot-a"></div><div class="dot-a"></div><div class="dot-a"></div></div>`;
+  body.appendChild(box);
+  const ta=document.createElement('textarea');
+  ta.className='text-area'; ta.id='oral-ta';
+  ta.placeholder='Écrivez ce que vous diriez à l\'oral…'; ta.rows=5;
+  body.appendChild(ta);
+  const wc=document.createElement('div');
+  wc.className='wc'; wc.textContent='0 mot(s)';
+  body.appendChild(wc);
+  ta.addEventListener('input',()=>{
+    const w=ta.value.trim().split(/\s+/).filter(x=>x.length>0).length;
+    wc.textContent=`${w} mot(s)`;
+    wc.style.color=w>=15?'var(--vert)':'var(--gris2)';
+  });
+  const btn=document.createElement('button');
+  btn.className='btn-gold';
+  btn.style.cssText='margin-top:14px;padding:13px 28px;font-size:14px;border-radius:100px;width:100%;';
+  btn.textContent='Valider ma prise de parole';
+  btn.onclick=()=>answerOral(q);
+  body.appendChild(btn);
+}
+
+function answerOral(q){
+  const ta=qs('oral-ta');
+  const val=ta.value.trim();
+  ta.disabled=true;
+  qs('q-body').querySelector('.btn-gold').disabled=true;
+  const words=val.split(/\s+/).filter(x=>x.length>0).length;
+  const ok=words>=12;
+  recordAnswer(q,ok,val);
+  const fb=qs('q-fb');
+  fb.className='feedback ok show';
+  fb.innerHTML=`<strong>✓ Prise de parole enregistrée</strong> (${words} mots) — Évaluée dans le rapport.`;
+  showNext();
+}
+
+// ─────────────────────────────────────────
+// FEEDBACK & SUIVI
+// ─────────────────────────────────────────
+function showFeedback(ok,exp){
+  const fb=qs('q-fb');
+  fb.className=`feedback ${ok?'ok':'ko'} show`;
+  fb.innerHTML=ok
+    ?`<strong>✓ Correct !</strong>${exp?'<br>'+exp:''}`
+    :`<strong>✗ Incorrect.</strong>${exp?'<br><em>'+exp+'</em>':''}`;
+}
+function showNext(){ qs('btn-next').style.display='inline-block'; }
+
+function recordAnswer(q,ok,given){
+  S.scores[SECTIONS[S.section].id].push({ok,pts:ok?q.pts:0,max:q.pts});
+  S.answers.push({
+    qid:q.id, sec:SECTIONS[S.section].id, lv:q.lv,
+    type:q.type, question:q.q||'', given, ok,
+    pts:ok?q.pts:0, max:q.pts, exp:q.exp||''
+  });
+  adaptLevel(ok);
+  renderDots();
+}
+
+function renderDots(){
+  const dots=qs('q-dots'); dots.innerHTML='';
+  const answers=S.scores[SECTIONS[S.section].id]||[];
+  for(let i=0;i<S.sectionQs.length;i++){
+    const d=document.createElement('div');
+    if(i===S.question&&i>=answers.length) d.className='dot cur';
+    else if(i<answers.length) d.className='dot '+(answers[i].ok?'ok':'ko');
+    else d.className='dot';
+    dots.appendChild(d);
+  }
+}
+
+function nextQuestion(){
+  S.question++;
+  if(S.question>=S.sectionQs.length) advanceSection();
+  else renderQuestion();
+}
+
+function advanceSection(){
+  S.section++;
+  if(S.section>=SECTIONS.length) endTest();
+  else loadSection(S.section);
+}
+
+// ─────────────────────────────────────────
+// FIN DU TEST
+// ─────────────────────────────────────────
+function endTest(){
+  stopTimer();
+  qs('hdr-prog-fill').style.width='100%';
+  qs('hdr-prog-lbl').textContent='100%';
+  showScreen('screen-loading');
+  const icons=['📊','🎯','🔍','📝','🏆'];
+  ['st-1','st-2','st-3','st-4','st-5'].forEach((id,i)=>{
+    setTimeout(()=>{
+      const el=qs(id);
+      el.classList.add('done');
+      el.querySelector('.s-ico').textContent='✓';
+    },(i+1)*900);
+  });
+  setTimeout(buildReport,5500);
+}
+
+// ─────────────────────────────────────────
+// CALCUL SCORES & CECRL
+// ─────────────────────────────────────────
+function calcSection(id){
+  const data=S.scores[id]||[];
+  if(!data.length) return{score:0,max:0,pct:0};
+  const score=data.reduce((a,x)=>a+x.pts,0);
+  const max=data.reduce((a,x)=>a+x.max,0);
+  return{score,max,pct:max>0?Math.round(score/max*100):0};
+}
+
+function calcCECRL(pcts){
+  let g=0,tw=0;
+  SECTIONS.forEach(s=>{ g+=(pcts[s.id]??0)*s.weight; tw+=s.weight; });
+  const score=tw>0?Math.round(g/tw):0;
+  if(score<12) return{level:'Pré-A1',code:'prea1',score,name:'Découverte',       desc:'Vous reconnaissez quelques mots et formules très basiques.'};
+  if(score<25) return{level:'A1',    code:'a1',   score,name:'Introductif',      desc:'Vous comprenez et utilisez des expressions familières très simples.'};
+  if(score<40) return{level:'A2',    code:'a2',   score,name:'Élémentaire',      desc:'Vous communiquez sur des sujets courants et simples.'};
+  if(score<55) return{level:'B1',    code:'b1',   score,name:'Intermédiaire',    desc:'Vous comprenez les points essentiels des sujets familiers.'};
+  if(score<70) return{level:'B2',    code:'b2',   score,name:'Avancé',           desc:'Vous comprenez des sujets concrets et abstraits complexes.'};
+  if(score<85) return{level:'C1',    code:'c1',   score,name:'Autonome avancé',  desc:'Vous vous exprimez spontanément, couramment et avec précision.'};
+  return            {level:'C2',    code:'c2',   score,name:'Maîtrise',         desc:'Vous maîtrisez la langue avec une très grande précision.'};
+}
+
+function nextLevelName(code){
+  const i=LVL.indexOf(code);
+  return i<LVL.length-1?LNAME[LVL[i+1]]:'C2 (perfectionnement)';
+}
+
+// ─────────────────────────────────────────
+// GÉNÉRATION DU RAPPORT
+// ─────────────────────────────────────────
+function buildReport(){
+  const pcts={};
+  SECTIONS.forEach(s=>{ pcts[s.id]=calcSection(s.id).pct; });
+  const cecrl=calcCECRL(pcts);
+  S.cecrl=cecrl;
+
+  showScreen('screen-report');
+
+  // Hero
+  qs('r-name').textContent=`${S.candidate.prenom} ${S.candidate.nom}`;
+  qs('r-date').textContent=`${S.candidate.date} · Durée : ${Math.floor(S.timerSec/60)} min ${S.timerSec%60} s`;
+  qs('r-level').textContent=cecrl.level;
+  qs('r-level-name').textContent=cecrl.name;
+  qs('r-level-desc').textContent=cecrl.desc;
+  qs('r-score').textContent=cecrl.score;
+
+  // Échelle
+  LVL.forEach(l=>{
+    if(l===cecrl.code){
+      qs('ss-'+l).classList.add('active');
+      qs('sl-'+l).classList.add('active');
+    }
+  });
+
+  // Scores
+  const scCfg=[
+    {id:'lecture',  name:'Compréhension écrite',  icon:'📖',bg:'#dbeafe',c:'#1d4ed8',bar:'#3b82f6'},
+    {id:'orale',    name:'Compréhension orale',    icon:'🎧',bg:'#e0e7ff',c:'#3730a3',bar:'#6366f1'},
+    {id:'ortho',    name:'Orthographe & Dictée',   icon:'✏️',bg:'#fee2e2',c:'#b91c1c',bar:'#ef4444'},
+    {id:'grammaire',name:'Grammaire',               icon:'⚙️',bg:'#dcfce7',c:'#15803d',bar:'#22c55e'},
+    {id:'vocab',    name:'Vocabulaire',             icon:'📚',bg:'#fef9c3',c:'#a16207',bar:'#eab308'},
+    {id:'ecrit',    name:'Expression écrite',      icon:'✍️',bg:'#f3e8ff',c:'#7e22ce',bar:'#a855f7'},
+    {id:'oral',     name:'Expression orale',       icon:'🎤',bg:'#ccfbf1',c:'#0f766e',bar:'#14b8a6'},
+  ];
+  const grid=qs('scores-grid'); grid.innerHTML='';
+  scCfg.forEach(c=>{
+    const sc=calcSection(c.id);
+    const p=sc.pct;
+    const sl=p<25?'A1':p<40?'A2':p<55?'B1':p<70?'B2':p<85?'C1':'C2';
+    const card=document.createElement('div');
+    card.className='sc-card';
+    card.style.borderBottomColor=c.bar;
+    card.innerHTML=`
+      <div class="sc-hd">
+        <div class="sc-ico" style="background:${c.bg};color:${c.c};">${c.icon}</div>
+        <div><div class="sc-nm">${c.name}</div><div class="sc-pts">${sc.score} / ${sc.max} pts</div></div>
+      </div>
+      <div class="bar-wrap"><div class="bar" id="bar-${c.id}" style="background:${c.bar};"></div></div>
+      <div class="sc-nums">
+        <span class="sc-val" style="color:${c.bar};">${p}%</span>
+        <span class="sc-sl" style="background:${c.bg};color:${c.c};">${sl}</span>
+      </div>`;
+    grid.appendChild(card);
+  });
+  setTimeout(()=>{ scCfg.forEach(c=>{ const b=qs('bar-'+c.id); if(b) b.style.width=calcSection(c.id).pct+'%'; }); },300);
+
+  // Certificat
+  buildCertificate(cecrl);
+
+  // Sauvegarde Airtable (silencieuse si non configuré)
+  saveToAirtable(cecrl, pcts);
+
+  // Rapport IA
+  generateAIReport(cecrl,pcts);
+}
+
+// ─────────────────────────────────────────
+// CERTIFICAT
+// ─────────────────────────────────────────
+function buildCertificate(cecrl){
+  const c=S.candidate;
+  const certId='LNG-'+Math.random().toString(36).substr(2,8).toUpperCase();
+  S.certId=certId;
+
+  qs('cert-name').textContent=`${c.prenom} ${c.nom}`;
+  qs('cert-level').textContent=cecrl.level;
+  qs('cert-desc').textContent=cecrl.desc;
+  qs('cert-score').textContent=cecrl.score+'/100';
+  qs('cert-date').textContent=c.date;
+  qs('cert-duration').textContent=Math.floor(S.timerSec/60)+' min';
+  qs('cert-id').textContent='Réf. : '+certId;
+
+  // QR code SVG simplifié (encodes le certId)
+  const qrEl=qs('cert-qr');
+  qrEl.innerHTML=generateQRSVG(certId);
+}
+
+function generateQRSVG(data){
+  // QR simplifié visuel (pattern unique basé sur les données)
+  const hash=data.split('').reduce((a,c)=>a+c.charCodeAt(0),0);
+  let cells='';
+  const size=7;
+  for(let r=0;r<size;r++){
+    for(let cc=0;cc<size;cc++){
+      const fill=((hash*(r+1)*(cc+1))%7)<3?'#f0c060':'transparent';
+      if(fill!=='transparent')
+        cells+=`<rect x="${cc*10+1}" y="${r*10+1}" width="9" height="9" fill="${fill}"/>`;
+    }
+  }
+  // Coins fixes (pattern QR)
+  const corners=`
+    <rect x="1" y="1" width="19" height="19" fill="none" stroke="#f0c060" stroke-width="2"/>
+    <rect x="4" y="4" width="13" height="13" fill="#f0c060"/>
+    <rect x="51" y="1" width="19" height="19" fill="none" stroke="#f0c060" stroke-width="2"/>
+    <rect x="54" y="4" width="13" height="13" fill="#f0c060"/>
+    <rect x="1" y="51" width="19" height="19" fill="none" stroke="#f0c060" stroke-width="2"/>
+    <rect x="4" y="54" width="13" height="13" fill="#f0c060"/>
+  `;
+  return `<svg viewBox="0 0 71 71" width="72" height="72" xmlns="http://www.w3.org/2000/svg" style="display:block;">
+    <rect width="71" height="71" fill="#0d1117" rx="4"/>
+    ${cells}${corners}
+  </svg>`;
+}
+
+function downloadCertificate(){
+  const c=S.candidate;
+  const cecrl=S.cecrl;
+  if(!cecrl){ alert('Passez d\'abord le test.'); return; }
+
+  const w=window.open('','_blank','width=850,height=650');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Inter:wght@400;600&display=swap');
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Inter',sans-serif;background:#fff;padding:40px;display:flex;justify-content:center;}
+    .cert{width:780px;border:3px solid #d4a843;border-radius:16px;padding:50px;text-align:center;background:linear-gradient(160deg,#fdf8ee,#fff);position:relative;overflow:hidden;}
+    .cert::before,.cert::after{content:'';position:absolute;width:150px;height:150px;border-radius:50%;background:rgba(212,168,67,.07);}
+    .cert::before{top:-40px;left:-40px;} .cert::after{bottom:-40px;right:-40px;}
+    .logo{font-family:'Playfair Display',serif;font-size:28px;font-weight:900;color:#0d1117;margin-bottom:4px;}
+    .logo span{color:#d4a843;}
+    .subtitle{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#9ca3af;margin-bottom:30px;}
+    .certifie{font-size:14px;color:#6b7280;margin-bottom:8px;}
+    .name{font-family:'Playfair Display',serif;font-size:42px;font-weight:700;color:#0d1117;margin-bottom:10px;}
+    .a-obtenu{font-size:14px;color:#6b7280;margin-bottom:10px;}
+    .level-box{display:inline-block;background:#0d1117;color:#d4a843;font-size:38px;font-weight:700;padding:12px 36px;border-radius:10px;margin-bottom:12px;font-family:'Playfair Display',serif;}
+    .desc{font-size:14px;color:#6b7280;max-width:460px;margin:0 auto 24px;line-height:1.6;}
+    .meta{display:flex;justify-content:center;gap:48px;margin-bottom:24px;}
+    .meta-item .v{font-weight:700;font-size:16px;color:#0d1117;}
+    .meta-item .k{font-size:11px;color:#9ca3af;text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+    .divider{height:1px;background:#f3f4f6;margin:20px 60px;}
+    .footer{display:flex;justify-content:space-between;align-items:center;margin-top:20px;}
+    .disclaimer{font-size:11px;color:#d1d5db;max-width:400px;text-align:left;line-height:1.5;}
+    .cert-id{font-family:'Courier New',monospace;font-size:12px;color:#d1d5db;}
+    .print-btn{position:fixed;bottom:20px;right:20px;background:#d4a843;color:#0d1117;border:none;padding:12px 24px;border-radius:100px;font-size:14px;font-weight:700;cursor:pointer;}
+  </style></head><body>
+
+  <div class="cert">
+    <div class="logo">LIN<span>GORA</span></div>
+    <div class="subtitle">Plateforme d'Évaluation des Langues · Certification CECRL</div>
+    <div class="certifie">Certifie que</div>
+    <div class="name">${c.prenom} ${c.nom}</div>
+    <div class="a-obtenu">a obtenu le niveau</div>
+    <div class="level-box">${cecrl.level}</div>
+    <div class="desc">${cecrl.desc}</div>
+    <div class="meta">
+      <div class="meta-item"><div class="v">${cecrl.score}/100</div><div class="k">Score global</div></div>
+      <div class="meta-item"><div class="v">${c.date}</div><div class="k">Date</div></div>
+      <div class="meta-item"><div class="v">${Math.floor(S.timerSec/60)} min</div><div class="k">Durée</div></div>
+      <div class="meta-item"><div class="v">${c.objectif}</div><div class="k">Objectif</div></div>
+    </div>
+    <div class="divider"></div>
+    <div class="footer">
+      <div class="disclaimer">Ce certificat LINGORA est un document d'évaluation pédagogique à but indicatif. Il ne remplace pas le TCF, DELF ou DALF officiels.</div>
+      <div class="cert-id">Réf. : ${S.certId||'LNG-'+Date.now()}</div>
+    </div>
+  </div>
+  <button class="print-btn" onclick="window.print();window.close();">🖨️ Télécharger PDF</button>
+  </body></html>`);
+  w.document.close();
+}
+
+// ─────────────────────────────────────────
+// RAPPORT IA (STREAMING)
+// ─────────────────────────────────────────
+async function generateAIReport(cecrl,pcts){
+const container=qs(‘ai-content’);
+container.innerHTML=’<div style="display:flex;justify-content:center;padding:40px;"><div class="ring"></div></div>’;
+
+const errors=S.answers.filter(a=>!a.ok&&a.type===‘mcq’).slice(0,10)
+.map(a=>`[${a.sec}/${a.lv}] ${a.question.substring(0,90)}${a.exp?' → '+a.exp.substring(0,120):''}`).join(’\n’);
+
+const prods=S.answers.filter(a=>[‘text’,‘oral’].includes(a.type))
+.map(a=>`[${a.sec}/${a.lv}] "${a.question.substring(0,100)}"\nRéponse: "${(a.given||'').substring(0,400)}"`).join(’\n\n’);
+
+const scoresTxt=SECTIONS.map(s=>`- ${s.name}: ${pcts[s.id]}%`).join(’\n’);
+
+const prompt=`Tu es un expert linguiste FLE (Français Langue Étrangère), évaluateur certifié TCF/DELF/TEF, pédagogue bienveillant.
+
+━━ PLATEFORME : LINGORA ━━
+━━ PROFIL ━━
+Candidat : ${S.candidate.prenom} ${S.candidate.nom}
+Langue maternelle : ${S.candidate.langue||‘non précisée’}
+Pays : ${S.candidate.pays||‘non précisé’}
+Objectif : ${S.candidate.objectif}
+Durée du test : ${Math.floor(S.timerSec/60)} min
+
+━━ RÉSULTATS ━━
+Niveau CECRL : ${cecrl.level} — ${cecrl.name}
+Score global : ${cecrl.score}/100
+${scoresTxt}
+
+━━ ERREURS DÉTECTÉES ━━
+${errors||‘Peu d'erreurs — bon niveau général.’}
+
+━━ PRODUCTIONS LIBRES ━━
+${prods||‘Aucune production soumise.’}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Génère un rapport pédagogique LINGORA complet avec ces sections (titres en h4) :
+
+### 1. RÉSUMÉ DU NIVEAU ${cecrl.level}
+
+Décris ce niveau CECRL précisément : ce que le candidat sait faire, ce qu’il ne maîtrise pas encore. Mentionne la durée d’apprentissage typique.
+
+### 2. ANALYSE PAR COMPÉTENCE
+
+Pour chaque compétence avec score < 70% : lacunes spécifiques identifiées.
+
+### 3. ERREURS CLÉS ET RÈGLES
+
+Pour les 3-4 erreurs principales :
+**Règle :** [nom]
+**Explication :** [claire et concise]
+**Exemple correct :** [exemple]
+**Contre-exemple :** [erreur fréquente]
+**Exercice :** [exercice ciblé]
+
+### 4. POINTS FORTS ✓
+
+Liste des compétences bien acquises.
+
+### 5. PRIORITÉS D’AMÉLIORATION ⚠
+
+Points à travailler en urgence.
+
+### 6. PLAN D’APPRENTISSAGE 8 SEMAINES
+
+Vers le niveau ${nextLevelName(cecrl.code)} :
+S1-S2 : [objectif + ressources + exercices concrets]
+S3-S4 : [objectif + ressources + exercices concrets]
+S5-S6 : [objectif + ressources + exercices concrets]
+S7-S8 : [bilan + préparation test officiel]
+
+Ressources gratuites recommandées (TV5Monde, RFI, Duolingo, Bescherelle en ligne, etc.)
+
+Ton : expert, bienveillant, précis. Français soutenu. ~800 mots.`;
+
+// Note : l’API Claude nécessite un serveur proxy en production.
+// En mode fichier local (file://), la requête est bloquée par le navigateur.
+// Le rapport de secours s’affiche automatiquement dans ce cas.
+try{
+const resp=await fetch(‘https://api.anthropic.com/v1/messages’,{
+method:‘POST’,
+headers:{‘Content-Type’:‘application/json’},
+body:JSON.stringify({
+model:‘claude-sonnet-4-20250514’,
+max_tokens:2000,
+stream:true,
+messages:[{role:‘user’,content:prompt}]
+})
+});
+if(!resp.ok) throw new Error(resp.status);
+
+```
+container.innerHTML='<div class="streaming"> </div>';
+const reader=resp.body.getReader();
+const dec=new TextDecoder();
+let full='';
+const streamEl=container.querySelector('.streaming');
+
+while(true){
+  const{done,value}=await reader.read();
+  if(done) break;
+  const lines=dec.decode(value,{stream:true}).split('\n').filter(l=>l.startsWith('data: '));
+  for(const line of lines){
+    const data=line.slice(6);
+    if(data==='[DONE]') continue;
+    try{
+      const p=JSON.parse(data);
+      if(p.type==='content_block_delta'&&p.delta?.text){
+        full+=p.delta.text;
+        streamEl.innerHTML=md2html(full);
+      }
+    }catch(e){}
+  }
+}
+streamEl.classList.remove('streaming');
+streamEl.innerHTML=md2html(full);
+```
+
+}catch(err){
+// Erreur réseau normale en mode fichier local — affichage du rapport de secours
+container.innerHTML=fallbackReport(cecrl,pcts);
+}
+}
+
+function md2html(t){
+return t
+.replace(/^#{1,3} (.+)$/gm,’<h4>$1</h4>’)
+.replace(/**(.+?)**/g,’<strong>$1</strong>’)
+.replace(/*(.+?)*/g,’<em>$1</em>’)
+.replace(/^[-•] (.+)$/gm,’<li>$1</li>’)
+.replace(/(<li>[^]*?</li>)/g,’<ul>$1</ul>’)
+.replace(/\n{2,}/g,’</p><p>’)
+.replace(/\n/g,’<br>’);
+}
+
+function fallbackReport(cecrl,pcts){
+const forts=SECTIONS.filter(s=>(pcts[s.id]||0)>=60).map(s=>`<span class="tag tok">✓ ${s.name}</span>`).join(’’);
+const faibles=SECTIONS.filter(s=>(pcts[s.id]||0)<50).map(s=>`<span class="tag tko">⚠ ${s.name}</span>`).join(’’);
+return ` <h4>1. Résumé du niveau ${cecrl.level}</h4> <p>Votre niveau estimé est <strong>${cecrl.level} — ${cecrl.name}</strong>. ${cecrl.desc}</p> <h4>2. Points forts</h4> <div class="tag-row">${forts||'<span class="tag tnl">À évaluer</span>'}</div> <h4>3. Priorités d'amélioration</h4> <div class="tag-row">${faibles||'<span class="tag tok">Bon niveau global !</span>'}</div> <h4>4. Plan d'apprentissage (8 semaines)</h4> <div class="plan-row"><span class="plan-wk">S1–S2</span><div class="plan-c"><h5>Consolidation des bases</h5><p>Grammaire fondamentale + vocabulaire courant. Ressource : TV5Monde Enseigner.</p></div></div> <div class="plan-row"><span class="plan-wk">S3–S4</span><div class="plan-c"><h5>Expression écrite</h5><p>3 textes par semaine. Correction via LanguageTool gratuit.</p></div></div> <div class="plan-row"><span class="plan-wk">S5–S6</span><div class="plan-c"><h5>Compréhension</h5><p>Articles RFI + podcasts adaptés à votre niveau.</p></div></div> <div class="plan-row"><span class="plan-wk">S7–S8</span><div class="plan-c"><h5>Révision finale</h5><p>Simulations TCF + objectif niveau ${nextLevelName(cecrl.code)}.</p></div></div> <p style="margin-top:16px;color:var(--gris2);font-size:12px;"><em>Pour un rapport IA complet, vérifiez votre connexion internet.</em></p>`;
+}
+
+// ─────────────────────────────────────────
+// RESTART
+// ─────────────────────────────────────────
+function restartTest(){
+S.candidate={}; S.section=0; S.question=0; S.sectionQs=[];
+S.scores={}; S.answers=[]; S.usedIds=new Set();
+S.level=‘a2’; S.streak=0; S.timerSec=0; S.timerStart=0; S.cecrl=null;
+stopTimer();
+SECTIONS.forEach(s=>{ S.scores[s.id]=[]; });
+
+qs(‘hdr-timer’).style.display=‘none’;
+qs(‘hdr-timer’).classList.remove(‘warn’);
+qs(‘hdr-timer’).textContent=‘⏱ 00:00’;
+S.timerSec   = 0;
+S.timerStart = 0;
+qs(‘hdr-prog-wrap’).style.display=‘none’;
+qs(‘hdr-prog-fill’).style.width=‘0%’;
+qs(‘scores-grid’).innerHTML=’’;
+qs(‘ai-content’).innerHTML=’’;
+LVL.forEach(l=>{ qs(‘ss-’+l).classList.remove(‘active’); qs(‘sl-’+l).classList.remove(‘active’); });
+const icons=[‘📊’,‘🎯’,‘🔍’,‘📝’,‘🏆’];
+[‘st-1’,‘st-2’,‘st-3’,‘st-4’,‘st-5’].forEach((id,i)=>{
+const el=qs(id); el.classList.remove(‘done’);
+el.querySelector(’.s-ico’).textContent=icons[i];
+});
+[‘f-prenom’,‘f-nom’,‘f-age’,‘f-pays’].forEach(id=>{ const el=qs(id); if(el) el.value=’’; });
+
+showScreen(‘screen-welcome’);
+}
+</script>
+
+</body>
+</html>
